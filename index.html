@@ -22,6 +22,7 @@ input:focus,textarea:focus{border-color:#00ff9d;box-shadow:0 0 0 2px #00ff9d22}
 .btn-secondary{background:transparent;color:#00ff9d;border:1px solid #00ff9d44}.btn-secondary:hover{border-color:#00ff9d;background:#00ff9d11}
 .btn-danger{background:transparent;color:#ff4444;border:1px solid #ff444444}.btn-danger:hover{border-color:#ff4444;background:#ff444411}
 .btn-excel{background:#1d6f42;color:#fff;border:1px solid #2a9d5c}.btn-excel:hover{background:#2a9d5c;transform:translateY(-1px);box-shadow:0 4px 20px #2a9d5c44}
+.btn-excel:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .card{background:#111820;border:1px solid #1e2d3d;border-radius:8px;padding:24px}
 .tag-badge{display:inline-block;padding:4px 12px;border-radius:3px;font-size:12px;letter-spacing:1px}
 .check-box{width:22px;height:22px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
@@ -65,8 +66,8 @@ function getCol(room) { return db.collection("rooms").doc(room).collection("tags
 function exportToExcel(records, roomCode) {
   const data = records.map(r => ({
     "TAG": r.tag,
-    "Planilla Calidad": r.estado_calidad ? "✓ SÍ" : "✗ NO",
-    "Planilla Precomisionado": r.estado_precomisionado ? "✓ SÍ" : "✗ NO",
+    "Planilla Calidad": r.estado_calidad ? "SÍ" : "NO",
+    "Planilla Precomisionado": r.estado_precomisionado ? "SÍ" : "NO",
     "Estado": r.estado_calidad && r.estado_precomisionado ? "COMPLETADO" : "PENDIENTE",
     "Fecha": r.fecha || "",
     "Responsable": r.responsable || "",
@@ -74,13 +75,10 @@ function exportToExcel(records, roomCode) {
     "Notas": r.notas || ""
   }));
   const ws = XLSX.utils.json_to_sheet(data);
-  // Column widths
   ws["!cols"] = [14,20,24,14,14,22,32,40].map(w=>({wch:w}));
-  // Header style row highlight
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "TAGs");
-  const fecha = new Date().toISOString().split("T")[0];
-  XLSX.writeFile(wb, `TAG_TRACKER_${roomCode}_${fecha}.xlsx`);
+  XLSX.writeFile(wb, `TAG_TRACKER_${roomCode}_${new Date().toISOString().split("T")[0]}.xlsx`);
 }
 
 function ImportWizard({ tags, db: dbProp, onFinish, onCancel }) {
@@ -93,24 +91,25 @@ function ImportWizard({ tags, db: dbProp, onFinish, onCancel }) {
   const [step, setStep] = useState("calidad");
   const current = tags[idx], total = tags.length;
   const alreadyExists = dbProp.find(r => r.tag === current);
+  const [forceEdit, setForceEdit] = useState(false);
 
   function next(ans) {
     const a = [...answers, ans];
     if (idx + 1 >= total) { onFinish(a); return; }
     setAnswers(a); setIdx(idx+1); setCalidad(null); setPrecom(null);
-    setResponsable(""); setFecha(new Date().toISOString().split("T")[0]); setStep("calidad");
+    setResponsable(""); setFecha(new Date().toISOString().split("T")[0]); setStep("calidad"); setForceEdit(false);
   }
   function skip() {
     if (idx + 1 >= total) { onFinish(answers); return; }
     setIdx(idx+1); setCalidad(null); setPrecom(null);
-    setResponsable(""); setFecha(new Date().toISOString().split("T")[0]); setStep("calidad");
+    setResponsable(""); setFecha(new Date().toISOString().split("T")[0]); setStep("calidad"); setForceEdit(false);
   }
 
   return (
     <div className="fade-in" style={{background:"#0d1520",border:"1px solid #7dd3fc44",borderRadius:10,padding:24,marginTop:12}}>
       <div style={{marginBottom:20}}>
         <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-          <span style={{fontSize:11,color:"#4a7a6a",letterSpacing:1}}>CARGANDO TAGs DESDE IMAGEN</span>
+          <span style={{fontSize:11,color:"#4a7a6a",letterSpacing:1}}>CARGANDO TAGs DESDE EXCEL</span>
           <span style={{fontSize:11,color:"#7dd3fc"}}>{idx+1} / {total}</span>
         </div>
         <div style={{height:3,background:"#1e2d3d",borderRadius:2}}>
@@ -121,12 +120,12 @@ function ImportWizard({ tags, db: dbProp, onFinish, onCancel }) {
         <span style={{fontSize:22,color:"#00ff9d",letterSpacing:3}}>{current}</span>
         {alreadyExists && <span style={{fontSize:11,color:"#fbbf24",background:"#fbbf2422",border:"1px solid #fbbf2444",borderRadius:3,padding:"3px 10px"}}>YA EXISTE</span>}
       </div>
-      {alreadyExists ? (
+      {alreadyExists && !forceEdit ? (
         <div>
-          <p style={{fontSize:13,color:"#a0aec0",marginBottom:14}}>Este TAG ya existe. ¿Saltarlo?</p>
+          <p style={{fontSize:13,color:"#a0aec0",marginBottom:14}}>Este TAG ya existe. ¿Qué querés hacer?</p>
           <div style={{display:"flex",gap:10}}>
             <button onClick={skip} className="btn btn-secondary">SALTEAR</button>
-            <button onClick={()=>setStep("calidad")} className="btn btn-danger">SOBREESCRIBIR</button>
+            <button onClick={()=>setForceEdit(true)} className="btn btn-primary">ACTUALIZAR ESTADO</button>
           </div>
         </div>
       ) : <>
@@ -212,16 +211,14 @@ function App() {
   const [precomMode, setPrecomMode] = useState(false);
   const [formError, setFormError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const [chatMessages, setChatMessages] = useState([{role:"assistant",text:"Hola. Soy tu asistente técnico de TAGs. Consultá el estado de cualquier registro o importá TAGs desde una imagen 📷."}]);
+  const [chatMessages, setChatMessages] = useState([{role:"assistant",text:"Hola. Soy tu asistente de TAGs. Podés consultarme el estado de cualquier registro o cargar un Excel 📊 para importar TAGs."}]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
-  const [imageData, setImageData] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
   const [wizardTags, setWizardTags] = useState(null);
   const [chatPrecomTag, setChatPrecomTag] = useState(null);
   const [chatPrecomForm, setChatPrecomForm] = useState({fecha:"",responsable:""});
   const chatEndRef = useRef(null);
-  const fileRef = useRef(null);
+  const excelRef = useRef(null);
 
   useEffect(() => {
     if (!roomCode) return;
@@ -280,85 +277,76 @@ function App() {
     setPrecomMode(false);
   }
 
-  function handleImageSelect(e) {
+  // Carga de Excel sin IA
+  function handleExcelSelect(e) {
     const file = e.target.files[0]; if (!file) return;
-    setImagePreview(URL.createObjectURL(file));
     const reader = new FileReader();
-    reader.onload = ev => setImageData(ev.target.result.split(",")[1]);
-    reader.readAsDataURL(file); e.target.value="";
+    reader.onload = ev => {
+      try {
+        const wb = XLSX.read(ev.target.result, {type:"binary"});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, {header:1});
+        // Tomar primera columna, saltar encabezado si es texto genérico
+        const tags = rows
+          .map(r => r[0])
+          .filter(v => v != null && String(v).trim().length >= 2)
+          .map(v => String(v).trim().toUpperCase())
+          .filter((v, i) => !(i === 0 && /^(tag|tags|nombre|name|id|item)$/i.test(v)));
+        if (!tags.length) {
+          setChatMessages(prev=>[...prev,{role:"assistant",text:"⚠ No encontré TAGs en la primera columna del Excel. Verificá que los TAGs estén en la columna A."}]);
+          setTab("chat"); return;
+        }
+        setChatMessages(prev=>[...prev,
+          {role:"user", text:`📊 Excel cargado: ${file.name}`},
+          {role:"assistant", text:`Encontré ${tags.length} TAG(s):\n${tags.slice(0,8).join(", ")}${tags.length>8?`\n...y ${tags.length-8} más.`:""}\n\nVoy a preguntarte el estado de cada uno.`}
+        ]);
+        setWizardTags(tags);
+        setTab("chat");
+      } catch(err) {
+        setChatMessages(prev=>[...prev,{role:"assistant",text:`Error al leer el Excel: ${err.message}`}]);
+        setTab("chat");
+      }
+    };
+    reader.readAsBinaryString(file);
+    e.target.value="";
   }
 
-  async function handleChatSend() {
+  // Chat solo consulta DB, sin IA externa
+  function handleChatSend() {
     const msg = chatInput.trim();
-    if ((!msg && !imageData) || chatLoading) return;
-    const hasImage = !!imageData;
-    const userMsg = {role:"user",text:msg||"📷 Imagen adjunta — extraé los TAGs",image:imagePreview};
-    const updatedMsgs = [...chatMessages, userMsg];
-    setChatMessages(updatedMsgs); setChatInput(""); setChatLoading(true);
-
-    const dbCtx = records.map(r=>`TAG:${r.tag}|Cal:${r.estado_calidad?"✓":"✗"}|Precom:${r.estado_precomisionado?"✓":"✗"}|Resp:${r.responsable||"N/A"}|${r.estado_calidad&&r.estado_precomisionado?"COMPLETADO":"PENDIENTE"}`).join("\n");
-    const sys = hasImage
-      ? `Eres un extractor de TAGs técnicos de imágenes. Un TAG es un identificador alfanumérico como "TAG-A123", "MCC-01", "PLC-02", "V-101", etc. Analizá la imagen y extraé TODOS los TAGs que veas. Respondé ÚNICAMENTE con un objeto JSON válido, sin texto adicional, sin markdown, sin explicaciones: {"tags":["TAG1","TAG2"]}. Si no hay TAGs, respondé: {"tags":[]}`
-      : `Asistente técnico de TAGs.\n${dbCtx}\nTotal:${records.length} Completados:${records.filter(r=>r.estado_calidad&&r.estado_precomisionado).length} Pendientes:${records.filter(r=>!r.estado_calidad||!r.estado_precomisionado).length}\nResponde en español, conciso.`;
-
-    const apiMsgs = hasImage
-      ? [{role:"user",content:[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:imageData}},{type:"text",text:msg||"Extraé los TAGs de esta imagen."}]}]
-      : updatedMsgs.filter((m,i)=>!(m.role==="assistant"&&i===0)).map(m=>({role:m.role==="assistant"?"assistant":"user",content:m.text}));
-
-    try {
-      const res = await fetch("https://tag-tracker-api.cerezuela-cyc.workers.dev/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:sys,messages:apiMsgs})});
-      if (!res.ok) {
-        const errText = await res.text();
-        console.error("Worker error:", res.status, errText);
-        setChatMessages(prev=>[...prev,{role:"assistant",text:`Error del servidor (${res.status}): ${errText.slice(0,300)}`}]);
-        setChatLoading(false); return;
+    if (!msg || chatLoading) return;
+    setChatMessages(prev=>[...prev,{role:"user",text:msg}]);
+    setChatInput("");
+    // Buscar TAG en la base local
+    const tagQuery = msg.toUpperCase().replace(/[^A-Z0-9\-_]/g,"");
+    const found = records.find(r=>r.tag===tagQuery);
+    if (found) {
+      const cal = found.estado_calidad?"✓ SÍ":"✗ NO";
+      const pre = found.estado_precomisionado?"✓ SÍ":"✗ NO";
+      const est = found.estado_calidad&&found.estado_precomisionado?"✅ COMPLETADO":"⏳ PENDIENTE";
+      setChatMessages(prev=>[...prev,{role:"assistant",text:`TAG: ${found.tag}\nCalidad: ${cal}\nPrecomisionado: ${pre}\nEstado: ${est}${found.responsable?"\nResponsable: "+found.responsable:""}${found.fecha?"\nFecha: "+found.fecha:""}`}]);
+    } else {
+      // Buscar coincidencias parciales
+      const parciales = records.filter(r=>r.tag.includes(tagQuery)||tagQuery.includes(r.tag.slice(0,4)));
+      if (parciales.length) {
+        setChatMessages(prev=>[...prev,{role:"assistant",text:`No encontré "${tagQuery}" exacto. TAGs similares:\n${parciales.slice(0,5).map(r=>`• ${r.tag} — ${r.estado_calidad&&r.estado_precomisionado?"COMPLETADO":"PENDIENTE"}`).join("\n")}`}]);
+      } else {
+        setChatMessages(prev=>[...prev,{role:"assistant",text:`No encontré el TAG "${tagQuery}" en la base de datos.\n\nTenemos ${records.length} registros. Verificá el código e intentá de nuevo.`}]);
       }
-      const data = await res.json();
-      console.log("API response:", JSON.stringify(data).slice(0,500));
-      const raw = data.content?.[0]?.text||"";
-      if (hasImage) {
-        try {
-          // Limpiar la respuesta de cualquier texto extra
-          let cleaned = raw.replace(/```json|```/g,"").trim();
-          // Buscar el JSON dentro de la respuesta si hay texto extra
-          const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-          if (jsonMatch) cleaned = jsonMatch[0];
-          const parsed = JSON.parse(cleaned);
-          const tags = (parsed.tags||[]).map(t=>t.trim().toUpperCase()).filter(Boolean);
-          setImageData(null); setImagePreview(null);
-          if (!tags.length) setChatMessages(prev=>[...prev,{role:"assistant",text:"No encontré TAGs en la imagen. Asegurate de que la imagen muestre TAGs técnicos claramente visibles."}]);
-          else { setChatMessages(prev=>[...prev,{role:"assistant",text:`Encontré ${tags.length} TAG(s): ${tags.join(", ")}.\n\nVoy a preguntarte el estado de cada uno.`}]); setWizardTags(tags); }
-        } catch(parseErr) {
-          console.error("Parse error:", parseErr, "Raw response:", raw);
-          // Intentar extraer TAGs manualmente si el JSON falla
-          const tagPattern = /\b([A-Z]{1,5}-?\d{2,6}[A-Z]?)\b/g;
-          const manualTags = [...raw.matchAll(tagPattern)].map(m=>m[1]);
-          setImageData(null); setImagePreview(null);
-          if (manualTags.length) {
-            setChatMessages(prev=>[...prev,{role:"assistant",text:`Encontré ${manualTags.length} TAG(s): ${manualTags.join(", ")}.\n\nVoy a preguntarte el estado de cada uno.`}]);
-            setWizardTags(manualTags);
-          } else {
-            setChatMessages(prev=>[...prev,{role:"assistant",text:`No pude interpretar la respuesta de la IA.\n\nRespuesta recibida: ${raw.slice(0,200)}`}]);
-          }
-        }
-      } else setChatMessages(prev=>[...prev,{role:"assistant",text:raw}]);
-    } catch { setChatMessages(prev=>[...prev,{role:"assistant",text:"Error de conexión con la IA."}]); }
-    setChatLoading(false);
+    }
   }
 
   async function handleWizardFinish(answers) {
     const today = new Date().toISOString().split("T")[0];
-    const newRecords = [];
+    let saved = 0;
     for (const a of answers) {
-      if (!records.find(r=>r.tag===a.tag)) {
-        const rec={tag:a.tag,estado_calidad:a.calidad,estado_precomisionado:a.precom,fecha:a.fecha||today,responsable:a.responsable||"",link:"",notas:""};
-        await saveRecord(rec); newRecords.push(rec);
-      }
+      const rec = {tag:a.tag, estado_calidad:!!a.calidad, estado_precomisionado:!!a.precom, fecha:a.fecha||today, responsable:a.responsable||"", link:"", notas:""};
+      await saveRecord(rec); // usa .set() → sobreescribe si existe, crea si no
+      saved++;
     }
     setWizardTags(null);
     const summary = answers.map(a=>`• ${a.tag}: Cal ${a.calidad?"✓":"✗"} | Precom ${a.precom?"✓":"✗"}`).join("\n");
-    const pendingPrecom = newRecords.filter(r=>r.estado_calidad&&!r.estado_precomisionado);
-    setChatMessages(prev=>[...prev,{role:"assistant",text:`✅ ${newRecords.length} registro(s) agregados:\n\n${summary}`,pendingPrecom}]);
+    setChatMessages(prev=>[...prev,{role:"assistant",text:`✅ ${saved} registro(s) guardados:\n\n${summary}`}]);
   }
 
   const completados = records.filter(r=>r.estado_calidad&&r.estado_precomisionado).length;
@@ -385,13 +373,13 @@ function App() {
         </div>
       )}
 
-      <div style={{borderBottom:"1px solid #1e3a2a",padding:"14px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",background:"#0d1318"}}>
+      <div style={{borderBottom:"1px solid #1e3a2a",padding:"14px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",background:"#0d1318",flexWrap:"wrap",gap:10}}>
         <div style={{display:"flex",alignItems:"center",gap:14}}>
           <div className="pulse" style={{width:8,height:8,borderRadius:"50%",background:"#00ff9d",boxShadow:"0 0 10px #00ff9d"}}/>
           <span style={{fontSize:18,fontWeight:700,color:"#00ff9d",letterSpacing:3}}>TAG TRACKER</span>
           <span style={{fontSize:11,color:"#4a6a5a",letterSpacing:2}}>v3.0</span>
         </div>
-        <div style={{display:"flex",alignItems:"center",gap:12}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
           <div style={{background:"#00ff9d11",border:"1px solid #00ff9d33",borderRadius:4,padding:"4px 12px",display:"flex",alignItems:"center",gap:8}}>
             <span style={{fontSize:10,color:"#4a7a6a",letterSpacing:1}}>SALA</span>
             <span style={{fontSize:13,color:"#00ff9d",letterSpacing:2}}>{roomCode}</span>
@@ -399,14 +387,14 @@ function App() {
           {loading && <span className="pulse" style={{fontSize:11,color:"#4a7a6a"}}>● SYNC</span>}
           <button onClick={()=>{setRoomCode(null);setRecords([]);resetSearch();}} style={{background:"none",border:"1px solid #1e3a2a",color:"#4a5568",borderRadius:4,padding:"4px 10px",cursor:"pointer",fontSize:11,fontFamily:"'Courier New',monospace"}}>SALIR</button>
           <div style={{display:"flex",gap:8}}>
-            {[["consulta","CONSULTA"],["registro","REGISTROS"],["chat","IA CHAT"]].map(([key,label])=>(
+            {[["consulta","CONSULTA"],["registro","REGISTROS"],["chat","CHAT"]].map(([key,label])=>(
               <button key={key} onClick={()=>setTab(key)} className="btn" style={{background:tab===key?"#00ff9d":"transparent",color:tab===key?"#0a0e14":"#4a7a6a",border:"1px solid "+(tab===key?"#00ff9d":"#1e3a2a"),fontSize:11,padding:"8px 16px"}}>{label}</button>
             ))}
           </div>
         </div>
       </div>
 
-      <div style={{background:"#0d1520",borderBottom:"1px solid #1e2d3d",padding:"10px 24px",display:"flex",gap:32,alignItems:"center"}}>
+      <div style={{background:"#0d1520",borderBottom:"1px solid #1e2d3d",padding:"10px 24px",display:"flex",gap:32,alignItems:"center",flexWrap:"wrap"}}>
         {[["TOTAL TAGs",records.length,"#7dd3fc"],["COMPLETADOS",completados,"#00ff9d"],["PENDIENTES",pendientes,"#fbbf24"]].map(([label,val,color])=>(
           <div key={label} style={{display:"flex",alignItems:"center",gap:8}}>
             <span style={{fontSize:20,fontWeight:700,color}}>{val}</span>
@@ -543,17 +531,13 @@ function App() {
 
         {tab==="registro"&&<div className="fade-in">
           <div style={{marginBottom:20}}>
-            <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
-              <div>
-                <h2 style={{fontSize:24,fontWeight:700,color:"#e2e8f0",letterSpacing:2}}>BASE DE DATOS</h2>
-                <p style={{fontSize:12,color:"#4a6a5a"}}>// {records.length} registros — sala: {roomCode}</p>
-              </div>
-            </div>
+            <h2 style={{fontSize:24,fontWeight:700,color:"#e2e8f0",letterSpacing:2}}>BASE DE DATOS</h2>
+            <p style={{fontSize:12,color:"#4a6a5a",marginBottom:14}}>// {records.length} registros — sala: {roomCode}</p>
             <button
               onClick={()=>exportToExcel(records, roomCode)}
               className="btn btn-excel"
               disabled={records.length===0}
-              style={{marginTop:14,width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:8,fontSize:14,padding:"12px",opacity:records.length===0?0.4:1}}
+              style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:8,fontSize:14,padding:"12px"}}
             >
               <span style={{fontSize:18}}>📥</span> DESCARGAR EXCEL
             </button>
@@ -583,50 +567,25 @@ function App() {
 
         {tab==="chat"&&<div className="fade-in" style={{display:"flex",flexDirection:"column",height:"calc(100vh - 220px)"}}>
           <div style={{marginBottom:16}}>
-            <h2 style={{fontSize:24,fontWeight:700,color:"#e2e8f0",letterSpacing:2}}>IA ASISTENTE</h2>
-            <p style={{fontSize:12,color:"#4a6a5a"}}>// consultas en lenguaje natural · importación desde imagen 📷</p>
+            <h2 style={{fontSize:24,fontWeight:700,color:"#e2e8f0",letterSpacing:2}}>ASISTENTE</h2>
+            <p style={{fontSize:12,color:"#4a6a5a"}}>// consultá un TAG · importá desde Excel 📊</p>
           </div>
           <div className="card" style={{flex:1,display:"flex",flexDirection:"column",minHeight:0}}>
             <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:14,padding:"8px 0",marginBottom:14}}>
               {chatMessages.map((m,i)=>(
                 <div key={i} style={{display:"flex",flexDirection:"column",alignItems:m.role==="user"?"flex-end":"flex-start"}}>
-                  {m.image&&<img src={m.image} alt="adjunto" style={{maxWidth:180,borderRadius:6,marginBottom:6,border:"1px solid #1e3a2a"}}/>}
                   <div className="chat-bubble" style={{background:m.role==="user"?"#00ff9d22":"#1a2535",border:`1px solid ${m.role==="user"?"#00ff9d44":"#1e2d3d"}`,color:m.role==="user"?"#00ff9d":"#a0aec0"}}>{m.text}</div>
-                  {m.pendingPrecom&&m.pendingPrecom.length>0&&(
-                    <div className="fade-in" style={{marginTop:10,background:"#0d1520",border:"1px solid #fbbf2433",borderRadius:8,padding:16,maxWidth:"85%"}}>
-                      <p style={{fontSize:11,color:"#fbbf24",marginBottom:10,letterSpacing:1}}>⚠ PRECOMISIONADO PENDIENTE EN:</p>
-                      <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
-                        {m.pendingPrecom.map(r=><button key={r.tag} onClick={()=>{setChatPrecomTag(r.tag);setChatPrecomForm({fecha:new Date().toISOString().split("T")[0],responsable:r.responsable||""});}} className="btn" style={{background:"#7dd3fc22",color:"#7dd3fc",border:"1px solid #7dd3fc44",fontSize:12,padding:"6px 14px"}}>+ {r.tag}</button>)}
-                      </div>
-                      {chatPrecomTag&&m.pendingPrecom.find(r=>r.tag===chatPrecomTag)&&(
-                        <div className="fade-in" style={{marginTop:14,borderTop:"1px solid #1e2d3d",paddingTop:14,display:"grid",gap:10}}>
-                          <p style={{fontSize:12,color:"#7dd3fc",letterSpacing:1}}>COMPLETAR: {chatPrecomTag}</p>
-                          <div><label style={{fontSize:11,color:"#4a7a6a",display:"block",marginBottom:4}}>FECHA</label><input type="date" value={chatPrecomForm.fecha} onChange={e=>setChatPrecomForm(f=>({...f,fecha:e.target.value}))}/></div>
-                          <div><label style={{fontSize:11,color:"#4a7a6a",display:"block",marginBottom:4}}>RESPONSABLE *</label><input value={chatPrecomForm.responsable} onChange={e=>setChatPrecomForm(f=>({...f,responsable:e.target.value}))} placeholder="Ing. Apellido"/></div>
-                          <div style={{display:"flex",gap:8}}>
-                            <button disabled={!chatPrecomForm.responsable.trim()} onClick={async()=>{await updateRecord(chatPrecomTag,{estado_precomisionado:true,fecha:chatPrecomForm.fecha,responsable:chatPrecomForm.responsable});setChatMessages(prev=>prev.map((msg,mi)=>mi===i?{...msg,pendingPrecom:msg.pendingPrecom.filter(r=>r.tag!==chatPrecomTag)}:msg));setChatPrecomTag(null);setChatMessages(prev=>[...prev,{role:"assistant",text:`✅ Precomisionado de ${chatPrecomTag} completado.`}]);}} className="btn btn-primary" style={{flex:1}}>GUARDAR</button>
-                            <button onClick={()=>setChatPrecomTag(null)} className="btn btn-secondary">CANCELAR</button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </div>
               ))}
               {chatLoading&&<div style={{display:"flex"}}><div className="chat-bubble" style={{background:"#1a2535",border:"1px solid #1e2d3d",color:"#00ff9d"}}><span className="pulse" style={{fontSize:12}}>procesando...</span></div></div>}
-              {wizardTags&&!chatLoading&&<ImportWizard tags={wizardTags} db={records} onFinish={handleWizardFinish} onCancel={()=>{setWizardTags(null);setChatMessages(prev=>[...prev,{role:"assistant",text:"Importación cancelada."}]);}}/>}
+              {wizardTags&&<ImportWizard tags={wizardTags} db={records} onFinish={handleWizardFinish} onCancel={()=>{setWizardTags(null);setChatMessages(prev=>[...prev,{role:"assistant",text:"Importación cancelada."}]);}}/>}
               <div ref={chatEndRef}/>
             </div>
-            {imagePreview&&<div style={{marginBottom:10,display:"flex",alignItems:"center",gap:10}}>
-              <img src={imagePreview} alt="preview" style={{height:56,borderRadius:6,border:"1px solid #00ff9d44"}}/>
-              <span style={{fontSize:11,color:"#4a7a6a"}}>Imagen lista</span>
-              <button onClick={()=>{setImageData(null);setImagePreview(null);}} style={{background:"none",border:"none",color:"#ff4444",cursor:"pointer",fontSize:16}}>✕</button>
-            </div>}
             <div style={{display:"flex",gap:10}}>
-              <input type="file" accept="image/*" ref={fileRef} onChange={handleImageSelect} style={{display:"none"}}/>
-              <button onClick={()=>fileRef.current.click()} className="img-btn" title="Adjuntar imagen">📷</button>
-              <input value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder={imageData?"Instrucciones opcionales...":"¿Cómo está el TAG-A123?..."} disabled={chatLoading} onKeyDown={e=>e.key==="Enter"&&handleChatSend()}/>
-              <button onClick={handleChatSend} className="btn btn-primary" disabled={chatLoading||(!chatInput.trim()&&!imageData)} style={{whiteSpace:"nowrap"}}>ENVIAR</button>
+              <input type="file" accept=".xlsx,.xls" ref={excelRef} onChange={handleExcelSelect} style={{display:"none"}}/>
+              <button onClick={()=>excelRef.current.click()} className="img-btn" title="Cargar Excel">📊</button>
+              <input value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder="Escribí un TAG para consultarlo..." disabled={chatLoading} onKeyDown={e=>e.key==="Enter"&&handleChatSend()}/>
+              <button onClick={handleChatSend} className="btn btn-primary" disabled={chatLoading||!chatInput.trim()} style={{whiteSpace:"nowrap"}}>ENVIAR</button>
             </div>
           </div>
         </div>}
