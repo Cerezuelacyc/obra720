@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>TAG TRACKER v3.0</title>
+<title>TAG TRACKER v4.0</title>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -12,297 +12,313 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Courier New',monospace;background:#0a0e14;color:#e2e8f0;min-height:100vh}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#0a0e14}::-webkit-scrollbar-thumb{background:#00ff9d33;border-radius:2px}
-input,textarea{background:#111820;border:1px solid #1e3a2a;color:#e2e8f0;padding:10px 14px;border-radius:4px;font-family:'Courier New',monospace;font-size:14px;transition:all 0.2s;outline:none;width:100%}
-input:focus,textarea:focus{border-color:#00ff9d;box-shadow:0 0 0 2px #00ff9d22}
-.btn{padding:10px 24px;border:none;border-radius:4px;cursor:pointer;font-weight:700;font-size:13px;letter-spacing:1px;transition:all 0.2s;text-transform:uppercase;font-family:'Courier New',monospace}
-.btn-primary{background:#00ff9d;color:#0a0e14}.btn-primary:hover{background:#00e88d;transform:translateY(-1px);box-shadow:0 4px 20px #00ff9d44}
-.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.btn-secondary{background:transparent;color:#00ff9d;border:1px solid #00ff9d44}.btn-secondary:hover{border-color:#00ff9d;background:#00ff9d11}
-.btn-danger{background:transparent;color:#ff4444;border:1px solid #ff444444}.btn-danger:hover{border-color:#ff4444;background:#ff444411}
-.btn-excel{background:#1d6f42;color:#fff;border:1px solid #2a9d5c}.btn-excel:hover{background:#2a9d5c;transform:translateY(-1px);box-shadow:0 4px 20px #2a9d5c44}
-.btn-excel:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.card{background:#111820;border:1px solid #1e2d3d;border-radius:8px;padding:24px}
-.tag-badge{display:inline-block;padding:4px 12px;border-radius:3px;font-size:12px;letter-spacing:1px}
-.check-box{width:22px;height:22px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+:root{
+  --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--bg4:#252d3d;
+  --green:#22d17a;--green2:#1aaa62;--green-dim:#22d17a18;--green-dim2:#22d17a30;
+  --blue:#60a5fa;--blue-dim:#60a5fa15;
+  --amber:#fbbf24;--amber-dim:#fbbf2418;
+  --red:#f87171;--red-dim:#f8717118;
+  --text:#f1f5f9;--text2:#94a3b8;--text3:#4a5568;
+  --border:#ffffff0d;--border2:#ffffff18;--border3:#ffffff28;
+  --radius:12px;--radius-sm:8px;--radius-lg:16px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border3);border-radius:4px}
+input,textarea,select{background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:var(--radius-sm);font-family:inherit;font-size:14px;transition:border-color 0.15s,box-shadow 0.15s;outline:none;width:100%}
+input:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-dim2)}
+input::placeholder,textarea::placeholder{color:var(--text3)}
+button{cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;border:none;border-radius:var(--radius-sm);transition:all 0.15s;letter-spacing:0.3px}
+.btn-green{background:var(--green);color:#0a1a12;padding:10px 20px}
+.btn-green:hover{background:var(--green2);transform:translateY(-1px)}
+.btn-green:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2);padding:10px 20px}
+.btn-ghost:hover{border-color:var(--border3);background:var(--bg4);color:var(--text)}
+.btn-red{background:var(--red-dim);color:var(--red);border:1px solid #f8717130;padding:10px 20px}
+.btn-red:hover{background:#f8717125}
+.btn-excel{background:#166534;color:#dcfce7;border:1px solid #22c55e40;padding:10px 20px}
+.btn-excel:hover{background:#15803d}
+.btn-excel:disabled{opacity:.4;cursor:not-allowed}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.card-lg{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-green{background:var(--green-dim2);color:var(--green)}
+.badge-amber{background:var(--amber-dim);color:var(--amber)}
+.badge-red{background:var(--red-dim);color:var(--red)}
+.badge-blue{background:var(--blue-dim);color:var(--blue)}
+.check{width:24px;height:24px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.check-on{background:var(--green-dim2);color:var(--green);border:1px solid var(--green-dim2)}
+.check-off{background:var(--red-dim);color:var(--red);border:1px solid #f8717130}
+.tab-btn{padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;transition:all 0.15s;background:transparent;color:var(--text3);border:none}
+.tab-btn:hover{color:var(--text2);background:var(--bg3)}
+.tab-btn.active{background:var(--bg3);color:var(--text);border:1px solid var(--border2)}
 .pulse{animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.fade-in{animation:fadeIn 0.3s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.scan-line{position:relative;overflow:hidden}
-.scan-line::after{content:'';position:absolute;top:-100%;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00ff9d44,transparent);animation:scan 3s linear infinite}
-@keyframes scan{to{top:200%}}
-.chat-bubble{max-width:85%;padding:12px 16px;border-radius:8px;font-size:13px;line-height:1.7;white-space:pre-wrap}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.fade{animation:fadeUp 0.25s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.progress-bar{height:6px;border-radius:3px;background:var(--bg4);overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;background:var(--green);transition:width 0.5s ease}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;padding:10px 12px;border-bottom:1px solid #1e3a2a;color:#00ff9d;font-weight:700;letter-spacing:1px;font-size:11px;text-transform:uppercase}
-td{padding:10px 12px;border-bottom:1px solid #1a2535;vertical-align:middle}
-tr:hover td{background:#0d1520}
-.img-btn{background:#111820;border:1px solid #1e3a2a;color:#4a7a6a;border-radius:4px;padding:10px 14px;cursor:pointer;font-size:18px;transition:all 0.2s}
-.img-btn:hover{border-color:#00ff9d;color:#00ff9d}
-.checkbox-row{display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 0}
-.checkbox-row input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:#00ff9d}
+th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)}
+td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg3)}
+.chat-msg{max-width:82%;padding:12px 16px;border-radius:12px;font-size:13px;line-height:1.7;white-space:pre-wrap}
+.checkbox-row{display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 0;border-bottom:1px solid var(--border)}
+.checkbox-row:last-child{border-bottom:none}
+.checkbox-row input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:var(--green);flex-shrink:0}
+.icon-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);border-radius:var(--radius-sm);padding:10px 13px;font-size:16px;line-height:1;transition:all 0.15s}
+.icon-btn:hover{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;display:flex;flex-direction:column;gap:4px}
+.modal-overlay{position:fixed;inset:0;background:#00000088;z-index:100;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script>
-  firebase.initializeApp({
-    apiKey: "AIzaSyCYola7PhP1aGVzt_DOIMysvJltImoROaw",
-    authDomain: "epf1-7a12e.firebaseapp.com",
-    projectId: "epf1-7a12e",
-    storageBucket: "epf1-7a12e.firebasestorage.app",
-    messagingSenderId: "222622123413",
-    appId: "1:222622123413:web:888403cbe94cfbf144229c"
-  });
-  const db = firebase.firestore();
+firebase.initializeApp({
+  apiKey:"AIzaSyCYola7PhP1aGVzt_DOIMysvJltImoROaw",
+  authDomain:"epf1-7a12e.firebaseapp.com",
+  projectId:"epf1-7a12e",
+  storageBucket:"epf1-7a12e.firebasestorage.app",
+  messagingSenderId:"222622123413",
+  appId:"1:222622123413:web:888403cbe94cfbf144229c"
+});
+const db = firebase.firestore();
 </script>
 <script type="text/babel">
-const { useState, useRef, useEffect } = React;
-const STATUS = { idle:"idle", found:"found", notfound:"notfound", adding:"adding", success:"success" };
+const {useState,useRef,useEffect} = React;
+const S = {idle:"idle",found:"found",notfound:"notfound",adding:"adding",success:"success"};
 
-function getCol(room) { return db.collection("rooms").doc(room).collection("tags"); }
+function getCol(room){return db.collection("rooms").doc(room).collection("tags");}
 
-function exportToExcel(records, roomCode) {
-  const data = records.map(r => ({
-    "TAG": r.tag,
-    "Planilla Calidad": r.estado_calidad ? "SÍ" : "NO",
-    "Planilla Precomisionado": r.estado_precomisionado ? "SÍ" : "NO",
-    "Estado": r.estado_calidad && r.estado_precomisionado ? "COMPLETADO" : "PENDIENTE",
-    "Fecha": r.fecha || "",
-    "Responsable": r.responsable || "",
-    "Link": r.link || "",
-    "Notas": r.notas || ""
+function exportToExcel(records,roomCode){
+  const data = records.map(r=>({
+    "TAG":r.tag,
+    "Planilla Calidad":r.estado_calidad?"SÍ":"NO",
+    "Planilla Precomisionado":r.estado_precomisionado?"SÍ":"NO",
+    "Estado":r.estado_calidad&&r.estado_precomisionado?"COMPLETADO":"PENDIENTE",
+    "Fecha":r.fecha||"","Responsable":r.responsable||"","Link":r.link||"","Notas":r.notas||""
   }));
-  const ws = XLSX.utils.json_to_sheet(data);
-  ws["!cols"] = [14,20,24,14,14,22,32,40].map(w=>({wch:w}));
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "TAGs");
-  XLSX.writeFile(wb, `TAG_TRACKER_${roomCode}_${new Date().toISOString().split("T")[0]}.xlsx`);
+  const ws=XLSX.utils.json_to_sheet(data);
+  ws["!cols"]=[14,20,24,14,14,22,32,40].map(w=>({wch:w}));
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"TAGs");
+  XLSX.writeFile(wb,`TAG_TRACKER_${roomCode}_${new Date().toISOString().split("T")[0]}.xlsx`);
 }
 
-function ImportWizard({ tags, db: dbProp, onFinish, onCancel }) {
-  const [idx, setIdx] = useState(0);
-  const [answers, setAnswers] = useState([]);
-  const [calidad, setCalidad] = useState(null);
-  const [precom, setPrecom] = useState(null);
-  const [responsable, setResponsable] = useState("");
-  const [fecha, setFecha] = useState(new Date().toISOString().split("T")[0]);
-  const [step, setStep] = useState("calidad");
-  const current = tags[idx], total = tags.length;
-  const alreadyExists = dbProp.find(r => r.tag === current);
-  const [forceEdit, setForceEdit] = useState(false);
+function ImportWizard({tags,db:dbProp,onFinish,onCancel}){
+  const [idx,setIdx]=useState(0);
+  const [answers,setAnswers]=useState([]);
+  const [calidad,setCalidad]=useState(null);
+  const [precom,setPrecom]=useState(null);
+  const [responsable,setResponsable]=useState("");
+  const [fecha,setFecha]=useState(new Date().toISOString().split("T")[0]);
+  const [step,setStep]=useState("calidad");
+  const [forceEdit,setForceEdit]=useState(false);
+  const current=tags[idx],total=tags.length;
+  const exists=dbProp.find(r=>r.tag===current);
 
-  function next(ans) {
-    const a = [...answers, ans];
-    if (idx + 1 >= total) { onFinish(a); return; }
-    setAnswers(a); setIdx(idx+1); setCalidad(null); setPrecom(null);
-    setResponsable(""); setFecha(new Date().toISOString().split("T")[0]); setStep("calidad"); setForceEdit(false);
+  function next(ans){
+    const a=[...answers,ans];
+    if(idx+1>=total){onFinish(a);return;}
+    setAnswers(a);setIdx(idx+1);setCalidad(null);setPrecom(null);
+    setResponsable("");setFecha(new Date().toISOString().split("T")[0]);setStep("calidad");setForceEdit(false);
   }
-  function skip() {
-    if (idx + 1 >= total) { onFinish(answers); return; }
-    setIdx(idx+1); setCalidad(null); setPrecom(null);
-    setResponsable(""); setFecha(new Date().toISOString().split("T")[0]); setStep("calidad"); setForceEdit(false);
+  function skip(){
+    if(idx+1>=total){onFinish(answers);return;}
+    setIdx(idx+1);setCalidad(null);setPrecom(null);
+    setResponsable("");setFecha(new Date().toISOString().split("T")[0]);setStep("calidad");setForceEdit(false);
   }
 
-  return (
-    <div className="fade-in" style={{background:"#0d1520",border:"1px solid #7dd3fc44",borderRadius:10,padding:24,marginTop:12}}>
-      <div style={{marginBottom:20}}>
-        <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-          <span style={{fontSize:11,color:"#4a7a6a",letterSpacing:1}}>CARGANDO TAGs DESDE EXCEL</span>
-          <span style={{fontSize:11,color:"#7dd3fc"}}>{idx+1} / {total}</span>
-        </div>
-        <div style={{height:3,background:"#1e2d3d",borderRadius:2}}>
-          <div style={{width:`${(idx/total)*100}%`,height:"100%",background:"#7dd3fc",borderRadius:2,transition:"width 0.4s"}}/>
-        </div>
+  return(
+    <div className="fade" style={{background:exists&&!forceEdit?"var(--amber-dim)":"var(--blue-dim)",border:`1px solid ${exists&&!forceEdit?"#fbbf2430":"#60a5fa30"}`,borderRadius:12,padding:20,marginTop:8}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <span style={{fontSize:11,fontWeight:700,letterSpacing:1,color:"var(--text3)",textTransform:"uppercase"}}>Importando desde Excel</span>
+        <span style={{fontSize:12,color:"var(--text2)"}}>{idx+1} / {total}</span>
       </div>
-      <div style={{marginBottom:18,display:"flex",alignItems:"center",gap:12}}>
-        <span style={{fontSize:22,color:"#00ff9d",letterSpacing:3}}>{current}</span>
-        {alreadyExists && <span style={{fontSize:11,color:"#fbbf24",background:"#fbbf2422",border:"1px solid #fbbf2444",borderRadius:3,padding:"3px 10px"}}>YA EXISTE</span>}
+      <div className="progress-bar" style={{marginBottom:16}}>
+        <div className="progress-fill" style={{width:`${((idx)/total)*100}%`}}/>
       </div>
-      {alreadyExists && !forceEdit ? (
-        <div>
-          <p style={{fontSize:13,color:"#a0aec0",marginBottom:14}}>Este TAG ya existe. ¿Qué querés hacer?</p>
-          <div style={{display:"flex",gap:10}}>
-            <button onClick={skip} className="btn btn-secondary">SALTEAR</button>
-            <button onClick={()=>setForceEdit(true)} className="btn btn-primary">ACTUALIZAR ESTADO</button>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
+        <span style={{fontSize:20,fontWeight:700,color:"var(--text)",letterSpacing:2}}>{current}</span>
+        {exists&&<span className="badge badge-amber">Ya existe</span>}
+      </div>
+
+      {exists&&!forceEdit?(
+        <div className="fade">
+          <p style={{fontSize:13,color:"var(--text2)",marginBottom:14}}>Este TAG ya existe en la base de datos. ¿Qué querés hacer?</p>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={skip} className="btn-ghost" style={{flex:1,borderRadius:8}}>Saltear</button>
+            <button onClick={()=>setForceEdit(true)} className="btn-green" style={{flex:1,borderRadius:8}}>Actualizar estado</button>
           </div>
         </div>
-      ) : <>
-        {step==="calidad" && <div className="fade-in">
-          <p style={{fontSize:14,color:"#e2e8f0",marginBottom:16}}>¿La <strong style={{color:"#7dd3fc"}}>Planilla de Calidad</strong> está hecha?</p>
-          <div style={{display:"flex",gap:10}}>
-            <button onClick={()=>{setCalidad(true);setStep("precom");}} className="btn btn-primary">✓ SÍ</button>
-            <button onClick={()=>{setCalidad(false);setStep("precom");}} className="btn btn-danger">✗ NO</button>
-            <button onClick={skip} className="btn btn-secondary" style={{marginLeft:"auto",fontSize:11}}>SALTEAR</button>
+      ):<>
+        {step==="calidad"&&<div className="fade">
+          <p style={{fontSize:13,color:"var(--text2)",marginBottom:14}}>¿La <strong style={{color:"var(--blue)"}}>Planilla de Calidad</strong> está completa?</p>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>{setCalidad(true);setStep("precom");}} className="btn-green" style={{flex:1,borderRadius:8}}>✓ Sí</button>
+            <button onClick={()=>{setCalidad(false);setStep("precom");}} className="btn-red" style={{flex:1,borderRadius:8}}>✗ No</button>
+            <button onClick={skip} className="btn-ghost" style={{borderRadius:8,fontSize:12}}>Saltear</button>
           </div>
         </div>}
-        {step==="precom" && <div className="fade-in">
-          <div style={{marginBottom:12}}><span style={{fontSize:12,color:"#4a6a5a"}}>Calidad: </span><span style={{color:calidad?"#00ff9d":"#ff4444"}}>{calidad?"✓":"✗"}</span></div>
-          <p style={{fontSize:14,color:"#e2e8f0",marginBottom:16}}>¿La <strong style={{color:"#7dd3fc"}}>Planilla de Precomisionado</strong> está hecha?</p>
-          <div style={{display:"flex",gap:10}}>
-            <button onClick={()=>{setPrecom(true);setStep("meta");}} className="btn btn-primary">✓ SÍ</button>
-            <button onClick={()=>{setPrecom(false);setStep("meta");}} className="btn btn-danger">✗ NO</button>
+        {step==="precom"&&<div className="fade">
+          <div style={{marginBottom:12,fontSize:12,color:"var(--text3)"}}>Calidad: <span style={{color:calidad?"var(--green)":"var(--red)"}}>{calidad?"✓ Sí":"✗ No"}</span></div>
+          <p style={{fontSize:13,color:"var(--text2)",marginBottom:14}}>¿La <strong style={{color:"var(--blue)"}}>Planilla de Precomisionado</strong> está completa?</p>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>{setPrecom(true);setStep("meta");}} className="btn-green" style={{flex:1,borderRadius:8}}>✓ Sí</button>
+            <button onClick={()=>{setPrecom(false);setStep("meta");}} className="btn-red" style={{flex:1,borderRadius:8}}>✗ No</button>
           </div>
         </div>}
-        {step==="meta" && <div className="fade-in" style={{display:"grid",gap:12}}>
-          <div style={{display:"flex",gap:16,fontSize:12,color:"#4a6a5a"}}>
-            <span>Calidad: <span style={{color:calidad?"#00ff9d":"#ff4444"}}>{calidad?"✓":"✗"}</span></span>
-            <span>Precomisionado: <span style={{color:precom?"#00ff9d":"#ff4444"}}>{precom?"✓":"✗"}</span></span>
+        {step==="meta"&&<div className="fade" style={{display:"grid",gap:12}}>
+          <div style={{display:"flex",gap:16,fontSize:12,color:"var(--text3)",marginBottom:4}}>
+            <span>Calidad: <span style={{color:calidad?"var(--green)":"var(--red)"}}>{calidad?"✓":"✗"}</span></span>
+            <span>Precomisionado: <span style={{color:precom?"var(--green)":"var(--red)"}}>{precom?"✓":"✗"}</span></span>
           </div>
-          <div><label style={{fontSize:11,color:"#4a7a6a",display:"block",marginBottom:5}}>RESPONSABLE</label><input value={responsable} onChange={e=>setResponsable(e.target.value)} placeholder="Ing. Apellido"/></div>
-          <div><label style={{fontSize:11,color:"#4a7a6a",display:"block",marginBottom:5}}>FECHA</label><input type="date" value={fecha} onChange={e=>setFecha(e.target.value)}/></div>
-          <div style={{display:"flex",gap:10}}>
-            <button onClick={()=>next({tag:current,calidad,precom,responsable,fecha})} className="btn btn-primary" style={{flex:1}}>{idx+1>=total?"FINALIZAR":"SIGUIENTE →"}</button>
-            <button onClick={skip} className="btn btn-secondary" style={{fontSize:11}}>SALTEAR</button>
+          <div><label style={{fontSize:11,color:"var(--text3)",display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:.5}}>Responsable</label><input value={responsable} onChange={e=>setResponsable(e.target.value)} placeholder="Ing. Apellido"/></div>
+          <div><label style={{fontSize:11,color:"var(--text3)",display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:.5}}>Fecha</label><input type="date" value={fecha} onChange={e=>setFecha(e.target.value)}/></div>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>next({tag:current,calidad,precom,responsable,fecha})} className="btn-green" style={{flex:1,borderRadius:8}}>{idx+1>=total?"Finalizar":"Siguiente →"}</button>
+            <button onClick={skip} className="btn-ghost" style={{borderRadius:8,fontSize:12}}>Saltear</button>
           </div>
         </div>}
       </>}
-      <button onClick={onCancel} style={{marginTop:16,background:"none",border:"none",color:"#4a5568",fontSize:11,cursor:"pointer"}}>✕ CANCELAR</button>
+      <button onClick={onCancel} style={{marginTop:14,background:"none",border:"none",color:"var(--text3)",fontSize:12,cursor:"pointer",padding:"4px 0"}}>✕ Cancelar importación</button>
     </div>
   );
 }
 
-function LoginScreen({ onEnter }) {
-  const [code, setCode] = useState("");
-  const [error, setError] = useState("");
-  function handle() {
-    const c = code.trim().toUpperCase().replace(/\s+/g,"-");
-    if (c.length < 3) { setError("Mínimo 3 caracteres."); return; }
+function LoginScreen({onEnter}){
+  const [code,setCode]=useState("");
+  const [error,setError]=useState("");
+  function handle(){
+    const c=code.trim().toUpperCase().replace(/\s+/g,"-");
+    if(c.length<3){setError("Mínimo 3 caracteres.");return;}
     onEnter(c);
   }
-  return (
-    <div style={{minHeight:"100vh",background:"#0a0e14",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-      <div style={{width:"100%",maxWidth:400,padding:24}}>
+  return(
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+      <div style={{width:"100%",maxWidth:400}}>
         <div style={{textAlign:"center",marginBottom:40}}>
-          <div className="pulse" style={{width:12,height:12,borderRadius:"50%",background:"#00ff9d",boxShadow:"0 0 16px #00ff9d",margin:"0 auto 20px"}}/>
-          <h1 style={{fontSize:28,fontWeight:700,color:"#00ff9d",letterSpacing:4,marginBottom:8}}>TAG TRACKER</h1>
-          <p style={{fontSize:12,color:"#4a6a5a",letterSpacing:2}}>SISTEMA DE GESTIÓN TÉCNICA v3.0</p>
+          <div style={{width:48,height:48,borderRadius:14,background:"var(--green-dim2)",border:"1px solid var(--green-dim2)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:22}}>⬡</div>
+          <h1 style={{fontSize:26,fontWeight:700,color:"var(--text)",marginBottom:6,letterSpacing:-0.5}}>Tag Tracker</h1>
+          <p style={{fontSize:13,color:"var(--text3)"}}>Sistema de gestión técnica v4.0</p>
         </div>
-        <div className="card">
-          <p style={{fontSize:13,color:"#a0aec0",marginBottom:24,textAlign:"center",lineHeight:1.6}}>
-            Ingresá el <span style={{color:"#00ff9d"}}>código de obra</span> para acceder a la base de datos compartida en tiempo real.
-          </p>
-          <label style={{fontSize:11,color:"#4a7a6a",display:"block",marginBottom:8,letterSpacing:1}}>CÓDIGO DE OBRA</label>
+        <div className="card-lg">
+          <p style={{fontSize:13,color:"var(--text2)",marginBottom:20,lineHeight:1.7}}>Ingresá el <span style={{color:"var(--green)"}}>código de obra</span> para acceder a la base de datos compartida.</p>
+          <label style={{fontSize:11,color:"var(--text3)",display:"block",marginBottom:6,textTransform:"uppercase",letterSpacing:.5}}>Código de obra</label>
           <input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setError("");}}
             onKeyDown={e=>e.key==="Enter"&&handle()} placeholder="Ej: OBRA-2025"
-            style={{fontSize:18,letterSpacing:3,textAlign:"center",marginBottom:8}}/>
-          {error && <p style={{fontSize:12,color:"#ff4444",marginBottom:8}}>{error}</p>}
-          <button onClick={handle} className="btn btn-primary" style={{width:"100%",marginTop:8,fontSize:14,padding:12}}>INGRESAR →</button>
+            style={{fontSize:16,letterSpacing:2,textAlign:"center",marginBottom:8}}/>
+          {error&&<p style={{fontSize:12,color:"var(--red)",marginBottom:8}}>{error}</p>}
+          <button onClick={handle} className="btn-green" style={{width:"100%",marginTop:8,fontSize:14,padding:12,borderRadius:10}}>Ingresar →</button>
         </div>
-        <p style={{textAlign:"center",fontSize:11,color:"#2d3748",marginTop:16}}>
-          Todos los que usen el mismo código comparten la misma base de datos en tiempo real.
-        </p>
+        <p style={{textAlign:"center",fontSize:12,color:"var(--text3)",marginTop:16,lineHeight:1.6}}>El mismo código da acceso a la misma base de datos en tiempo real.</p>
       </div>
     </div>
   );
 }
 
-function App() {
-  const [roomCode, setRoomCode] = useState(null);
-  const [records, setRecords] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState("consulta");
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState(STATUS.idle);
-  const [currentRecord, setCurrentRecord] = useState(null);
-  const [form, setForm] = useState({fecha:"",responsable:"",estado_calidad:false,estado_precomisionado:false,link:"",notas:""});
-  const [precomForm, setPrecomForm] = useState({fecha:"",responsable:"",notas:""});
-  const [precomMode, setPrecomMode] = useState(false);
-  const [formError, setFormError] = useState("");
-  const [confirmDelete, setConfirmDelete] = useState(null);
-  const [chatMessages, setChatMessages] = useState([{role:"assistant",text:"Hola. Soy tu asistente de TAGs. Podés consultarme el estado de cualquier registro o cargar un Excel 📊 para importar TAGs."}]);
-  const [chatInput, setChatInput] = useState("");
-  const [chatLoading, setChatLoading] = useState(false);
-  const [wizardTags, setWizardTags] = useState(null);
-  const [chatPrecomTag, setChatPrecomTag] = useState(null);
-  const [chatPrecomForm, setChatPrecomForm] = useState({fecha:"",responsable:""});
-  const chatEndRef = useRef(null);
-  const excelRef = useRef(null);
+function App(){
+  const [roomCode,setRoomCode]=useState(null);
+  const [records,setRecords]=useState([]);
+  const [loading,setLoading]=useState(false);
+  const [tab,setTab]=useState("consulta");
+  const [query,setQuery]=useState("");
+  const [status,setStatus]=useState(S.idle);
+  const [currentRecord,setCurrentRecord]=useState(null);
+  const [form,setForm]=useState({fecha:"",responsable:"",estado_calidad:false,estado_precomisionado:false,link:"",notas:""});
+  const [precomForm,setPrecomForm]=useState({fecha:"",responsable:"",notas:""});
+  const [precomMode,setPrecomMode]=useState(false);
+  const [formError,setFormError]=useState("");
+  const [confirmDelete,setConfirmDelete]=useState(null);
+  const [chatMessages,setChatMessages]=useState([{role:"assistant",text:"Hola. Consultame el estado de cualquier TAG o cargá un Excel 📊 para importar registros."}]);
+  const [chatInput,setChatInput]=useState("");
+  const [wizardTags,setWizardTags]=useState(null);
+  const chatEndRef=useRef(null);
+  const excelRef=useRef(null);
+  const excelImportRef=useRef(null);
 
-  useEffect(() => {
-    if (!roomCode) return;
+  useEffect(()=>{
+    if(!roomCode)return;
     setLoading(true);
-    const unsub = getCol(roomCode).orderBy("tag").onSnapshot(snap => {
-      setRecords(snap.docs.map(d => ({id:d.id,...d.data()})));
+    const unsub=getCol(roomCode).orderBy("tag").onSnapshot(snap=>{
+      setRecords(snap.docs.map(d=>({id:d.id,...d.data()})));
       setLoading(false);
     });
-    return () => unsub();
-  }, [roomCode]);
+    return()=>unsub();
+  },[roomCode]);
 
-  useEffect(() => { chatEndRef.current?.scrollIntoView({behavior:"smooth"}); }, [chatMessages]);
+  useEffect(()=>{chatEndRef.current?.scrollIntoView({behavior:"smooth"});},[chatMessages]);
 
-  useEffect(() => {
-    if (currentRecord) {
-      const u = records.find(r => r.tag === currentRecord.tag);
-      if (u) setCurrentRecord(u);
+  useEffect(()=>{
+    if(currentRecord){
+      const u=records.find(r=>r.tag===currentRecord.tag);
+      if(u)setCurrentRecord(u);
     }
-  }, [records]);
+  },[records]);
 
-  async function saveRecord(rec) { await getCol(roomCode).doc(rec.tag).set(rec); }
-  async function removeRecord(tag) { await getCol(roomCode).doc(tag).delete(); }
-  async function updateRecord(tag, fields) { await getCol(roomCode).doc(tag).update(fields); }
+  async function saveRecord(rec){await getCol(roomCode).doc(rec.tag).set(rec);}
+  async function removeRecord(tag){await getCol(roomCode).doc(tag).delete();}
+  async function updateRecord(tag,fields){await getCol(roomCode).doc(tag).update(fields);}
 
-  function handleSearch() {
-    const q = query.trim().toUpperCase(); if (!q) return;
-    const found = records.find(r => r.tag.toUpperCase()===q);
-    if (found) { setCurrentRecord(found); setStatus(STATUS.found); }
-    else { setCurrentRecord(null); setStatus(STATUS.notfound); }
+  function handleSearch(){
+    const q=query.trim().toUpperCase();if(!q)return;
+    const found=records.find(r=>r.tag.toUpperCase()===q);
+    if(found){setCurrentRecord(found);setStatus(S.found);}
+    else{setCurrentRecord(null);setStatus(S.notfound);}
   }
 
-  function startAdd() {
+  function startAdd(){
     setForm({fecha:new Date().toISOString().split("T")[0],responsable:"",estado_calidad:false,estado_precomisionado:false,link:"",notas:""});
-    setFormError(""); setStatus(STATUS.adding);
+    setFormError("");setStatus(S.adding);
   }
 
-  async function handleFormSubmit() {
-    if (!form.responsable.trim()) { setFormError("El responsable es obligatorio."); return; }
-    if (!form.fecha) { setFormError("La fecha es obligatoria."); return; }
-    const newTag = query.trim().toUpperCase();
-    if (records.find(r=>r.tag.toUpperCase()===newTag)) { setFormError("Este TAG ya existe."); return; }
-    const rec = {tag:newTag,...form};
-    await saveRecord(rec); setCurrentRecord(rec); setStatus(STATUS.success);
+  async function handleFormSubmit(){
+    if(!form.responsable.trim()){setFormError("El responsable es obligatorio.");return;}
+    if(!form.fecha){setFormError("La fecha es obligatoria.");return;}
+    const newTag=query.trim().toUpperCase();
+    if(records.find(r=>r.tag.toUpperCase()===newTag)){setFormError("Este TAG ya existe.");return;}
+    const rec={tag:newTag,...form};
+    await saveRecord(rec);setCurrentRecord(rec);setStatus(S.success);
   }
 
-  function resetSearch() { setQuery(""); setStatus(STATUS.idle); setCurrentRecord(null); setPrecomMode(false); }
+  function resetSearch(){setQuery("");setStatus(S.idle);setCurrentRecord(null);setPrecomMode(false);}
 
-  async function handlePrecomSubmit() {
-    if (!precomForm.responsable.trim()) return;
-    await updateRecord(currentRecord.tag, {
+  async function handlePrecomSubmit(){
+    if(!precomForm.responsable.trim())return;
+    await updateRecord(currentRecord.tag,{
       ...(precomMode==="calidad"?{estado_calidad:true}:{estado_precomisionado:true}),
-      fecha: precomForm.fecha||currentRecord.fecha,
-      responsable: precomForm.responsable,
-      notas: precomForm.notas?(currentRecord.notas?currentRecord.notas+" | "+precomForm.notas:precomForm.notas):currentRecord.notas
+      fecha:precomForm.fecha||currentRecord.fecha,
+      responsable:precomForm.responsable,
+      notas:precomForm.notas?(currentRecord.notas?currentRecord.notas+" | "+precomForm.notas:precomForm.notas):currentRecord.notas
     });
     setPrecomMode(false);
   }
 
-  // Carga de Excel sin IA
-  function handleExcelSelect(e) {
-    const file = e.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const wb = XLSX.read(ev.target.result, {type:"binary"});
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(ws, {header:1});
-        // Tomar primera columna, saltar encabezado si es texto genérico
-        const tags = rows
-          .map(r => r[0])
-          .filter(v => v != null && String(v).trim().length >= 2)
-          .map(v => String(v).trim().toUpperCase())
-          .filter((v, i) => !(i === 0 && /^(tag|tags|nombre|name|id|item)$/i.test(v)));
-        if (!tags.length) {
-          setChatMessages(prev=>[...prev,{role:"assistant",text:"⚠ No encontré TAGs en la primera columna del Excel. Verificá que los TAGs estén en la columna A."}]);
-          setTab("chat"); return;
+  function handleExcelSelect(e,isImport=false){
+    const file=e.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      try{
+        const wb=XLSX.read(ev.target.result,{type:"binary"});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        const rows=XLSX.utils.sheet_to_json(ws,{header:1});
+        const tags=rows
+          .map(r=>r[0])
+          .filter(v=>v!=null&&String(v).trim().length>=2)
+          .map(v=>String(v).trim().toUpperCase())
+          .filter((v,i)=>!(i===0&&/^(tag|tags|nombre|name|id|item)$/i.test(v)));
+        if(!tags.length){
+          setChatMessages(prev=>[...prev,{role:"assistant",text:"⚠ No encontré TAGs en la columna A del Excel."}]);
+          setTab("chat");return;
         }
         setChatMessages(prev=>[...prev,
-          {role:"user", text:`📊 Excel cargado: ${file.name}`},
-          {role:"assistant", text:`Encontré ${tags.length} TAG(s):\n${tags.slice(0,8).join(", ")}${tags.length>8?`\n...y ${tags.length-8} más.`:""}\n\nVoy a preguntarte el estado de cada uno.`}
+          {role:"user",text:`📊 ${file.name}`},
+          {role:"assistant",text:`Encontré ${tags.length} TAG(s):\n${tags.slice(0,6).join(", ")}${tags.length>6?` y ${tags.length-6} más...`:""}\n\nVoy a preguntarte el estado de cada uno.`}
         ]);
-        setWizardTags(tags);
-        setTab("chat");
-      } catch(err) {
+        setWizardTags(tags);setTab("chat");
+      }catch(err){
         setChatMessages(prev=>[...prev,{role:"assistant",text:`Error al leer el Excel: ${err.message}`}]);
         setTab("chat");
       }
@@ -311,252 +327,265 @@ function App() {
     e.target.value="";
   }
 
-  // Chat solo consulta DB, sin IA externa
-  function handleChatSend() {
-    const msg = chatInput.trim();
-    if (!msg || chatLoading) return;
+  function handleChatSend(){
+    const msg=chatInput.trim();if(!msg)return;
     setChatMessages(prev=>[...prev,{role:"user",text:msg}]);
     setChatInput("");
-    // Buscar TAG en la base local
-    const tagQuery = msg.toUpperCase().replace(/[^A-Z0-9\-_]/g,"");
-    const found = records.find(r=>r.tag===tagQuery);
-    if (found) {
-      const cal = found.estado_calidad?"✓ SÍ":"✗ NO";
-      const pre = found.estado_precomisionado?"✓ SÍ":"✗ NO";
-      const est = found.estado_calidad&&found.estado_precomisionado?"✅ COMPLETADO":"⏳ PENDIENTE";
+    const tagQ=msg.toUpperCase().replace(/[^A-Z0-9\-_]/g,"");
+    const found=records.find(r=>r.tag===tagQ);
+    if(found){
+      const cal=found.estado_calidad?"✓ Sí":"✗ No";
+      const pre=found.estado_precomisionado?"✓ Sí":"✗ No";
+      const est=found.estado_calidad&&found.estado_precomisionado?"✅ Completado":"⏳ Pendiente";
       setChatMessages(prev=>[...prev,{role:"assistant",text:`TAG: ${found.tag}\nCalidad: ${cal}\nPrecomisionado: ${pre}\nEstado: ${est}${found.responsable?"\nResponsable: "+found.responsable:""}${found.fecha?"\nFecha: "+found.fecha:""}`}]);
     } else {
-      // Buscar coincidencias parciales
-      const parciales = records.filter(r=>r.tag.includes(tagQuery)||tagQuery.includes(r.tag.slice(0,4)));
-      if (parciales.length) {
-        setChatMessages(prev=>[...prev,{role:"assistant",text:`No encontré "${tagQuery}" exacto. TAGs similares:\n${parciales.slice(0,5).map(r=>`• ${r.tag} — ${r.estado_calidad&&r.estado_precomisionado?"COMPLETADO":"PENDIENTE"}`).join("\n")}`}]);
+      const parciales=records.filter(r=>r.tag.includes(tagQ)||tagQ.includes(r.tag.slice(0,4)));
+      if(parciales.length){
+        setChatMessages(prev=>[...prev,{role:"assistant",text:`No encontré "${tagQ}" exacto. TAGs similares:\n${parciales.slice(0,5).map(r=>`• ${r.tag} — ${r.estado_calidad&&r.estado_precomisionado?"Completado":"Pendiente"}`).join("\n")}`}]);
       } else {
-        setChatMessages(prev=>[...prev,{role:"assistant",text:`No encontré el TAG "${tagQuery}" en la base de datos.\n\nTenemos ${records.length} registros. Verificá el código e intentá de nuevo.`}]);
+        setChatMessages(prev=>[...prev,{role:"assistant",text:`No encontré el TAG "${tagQ}" en la base de datos.\n\nTenemos ${records.length} registros cargados.`}]);
       }
     }
   }
 
-  async function handleWizardFinish(answers) {
-    const today = new Date().toISOString().split("T")[0];
-    let saved = 0;
-    for (const a of answers) {
-      const rec = {tag:a.tag, estado_calidad:!!a.calidad, estado_precomisionado:!!a.precom, fecha:a.fecha||today, responsable:a.responsable||"", link:"", notas:""};
-      await saveRecord(rec); // usa .set() → sobreescribe si existe, crea si no
-      saved++;
+  async function handleWizardFinish(answers){
+    const today=new Date().toISOString().split("T")[0];
+    let saved=0;
+    for(const a of answers){
+      const rec={tag:a.tag,estado_calidad:!!a.calidad,estado_precomisionado:!!a.precom,fecha:a.fecha||today,responsable:a.responsable||"",link:"",notas:""};
+      await saveRecord(rec);saved++;
     }
     setWizardTags(null);
-    const summary = answers.map(a=>`• ${a.tag}: Cal ${a.calidad?"✓":"✗"} | Precom ${a.precom?"✓":"✗"}`).join("\n");
+    const summary=answers.map(a=>`• ${a.tag}: Cal ${a.calidad?"✓":"✗"} | Precom ${a.precom?"✓":"✗"}`).join("\n");
     setChatMessages(prev=>[...prev,{role:"assistant",text:`✅ ${saved} registro(s) guardados:\n\n${summary}`}]);
   }
 
-  const completados = records.filter(r=>r.estado_calidad&&r.estado_precomisionado).length;
-  const pendientes = records.length - completados;
+  const completados=records.filter(r=>r.estado_calidad&&r.estado_precomisionado).length;
+  const pendientes=records.length-completados;
+  const pct=records.length?Math.round((completados/records.length)*100):0;
 
-  if (!roomCode) return <LoginScreen onEnter={setRoomCode}/>;
+  if(!roomCode)return <LoginScreen onEnter={setRoomCode}/>;
 
-  return (
-    <div style={{minHeight:"100vh",background:"#0a0e14",color:"#e2e8f0",fontFamily:"'Courier New',monospace",display:"flex",flexDirection:"column"}}>
+  return(
+    <div style={{minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column"}}>
 
-      {confirmDelete && (
-        <div style={{position:"fixed",inset:0,background:"#000000aa",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          <div className="card fade-in" style={{maxWidth:380,width:"90%",borderColor:"#ff444466",textAlign:"center"}}>
-            <div style={{fontSize:36,marginBottom:12}}>⚠</div>
-            <p style={{fontSize:16,fontWeight:700,color:"#ff4444",marginBottom:8}}>¿ELIMINAR REGISTRO?</p>
-            <p style={{fontSize:13,color:"#a0aec0",marginBottom:6}}>Estás por eliminar permanentemente:</p>
-            <p style={{fontSize:20,color:"#00ff9d",letterSpacing:3,marginBottom:20}}>{confirmDelete}</p>
-            <p style={{fontSize:12,color:"#4a5568",marginBottom:24}}>Esta acción no se puede deshacer.</p>
-            <div style={{display:"flex",gap:12}}>
-              <button onClick={async()=>{await removeRecord(confirmDelete);setConfirmDelete(null);if(currentRecord?.tag===confirmDelete)resetSearch();}} className="btn btn-danger" style={{flex:1,background:"#ff444422",border:"1px solid #ff4444"}}>SÍ, ELIMINAR</button>
-              <button onClick={()=>setConfirmDelete(null)} className="btn btn-primary" style={{flex:1}}>CANCELAR</button>
+      {confirmDelete&&(
+        <div className="modal-overlay">
+          <div className="card-lg fade" style={{maxWidth:360,width:"90%",borderColor:"#f8717130"}}>
+            <div style={{textAlign:"center",marginBottom:20}}>
+              <div style={{width:48,height:48,borderRadius:12,background:"var(--red-dim)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px",fontSize:20}}>⚠</div>
+              <p style={{fontSize:16,fontWeight:700,color:"var(--red)",marginBottom:6}}>Eliminar registro</p>
+              <p style={{fontSize:13,color:"var(--text2)",marginBottom:4}}>Vas a eliminar permanentemente:</p>
+              <p style={{fontSize:18,fontWeight:700,color:"var(--text)",letterSpacing:2,margin:"8px 0"}}>{confirmDelete}</p>
+              <p style={{fontSize:12,color:"var(--text3)"}}>Esta acción no se puede deshacer.</p>
+            </div>
+            <div style={{display:"flex",gap:10}}>
+              <button onClick={async()=>{await removeRecord(confirmDelete);setConfirmDelete(null);if(currentRecord?.tag===confirmDelete)resetSearch();}} className="btn-red" style={{flex:1,borderRadius:8}}>Sí, eliminar</button>
+              <button onClick={()=>setConfirmDelete(null)} className="btn-ghost" style={{flex:1,borderRadius:8}}>Cancelar</button>
             </div>
           </div>
         </div>
       )}
 
-      <div style={{borderBottom:"1px solid #1e3a2a",padding:"14px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",background:"#0d1318",flexWrap:"wrap",gap:10}}>
-        <div style={{display:"flex",alignItems:"center",gap:14}}>
-          <div className="pulse" style={{width:8,height:8,borderRadius:"50%",background:"#00ff9d",boxShadow:"0 0 10px #00ff9d"}}/>
-          <span style={{fontSize:18,fontWeight:700,color:"#00ff9d",letterSpacing:3}}>TAG TRACKER</span>
-          <span style={{fontSize:11,color:"#4a6a5a",letterSpacing:2}}>v3.0</span>
-        </div>
-        <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-          <div style={{background:"#00ff9d11",border:"1px solid #00ff9d33",borderRadius:4,padding:"4px 12px",display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontSize:10,color:"#4a7a6a",letterSpacing:1}}>SALA</span>
-            <span style={{fontSize:13,color:"#00ff9d",letterSpacing:2}}>{roomCode}</span>
+      {/* Header */}
+      <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:"12px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10,position:"sticky",top:0,zIndex:50}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <div style={{width:32,height:32,borderRadius:9,background:"var(--green-dim2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>⬡</div>
+          <div>
+            <span style={{fontSize:15,fontWeight:700,color:"var(--text)"}}>Tag Tracker</span>
+            <span style={{fontSize:11,color:"var(--text3)",marginLeft:8}}>v4.0</span>
           </div>
-          {loading && <span className="pulse" style={{fontSize:11,color:"#4a7a6a"}}>● SYNC</span>}
-          <button onClick={()=>{setRoomCode(null);setRecords([]);resetSearch();}} style={{background:"none",border:"1px solid #1e3a2a",color:"#4a5568",borderRadius:4,padding:"4px 10px",cursor:"pointer",fontSize:11,fontFamily:"'Courier New',monospace"}}>SALIR</button>
-          <div style={{display:"flex",gap:8}}>
-            {[["consulta","CONSULTA"],["registro","REGISTROS"],["chat","CHAT"]].map(([key,label])=>(
-              <button key={key} onClick={()=>setTab(key)} className="btn" style={{background:tab===key?"#00ff9d":"transparent",color:tab===key?"#0a0e14":"#4a7a6a",border:"1px solid "+(tab===key?"#00ff9d":"#1e3a2a"),fontSize:11,padding:"8px 16px"}}>{label}</button>
+          <div style={{background:"var(--bg3)",border:"1px solid var(--border2)",borderRadius:20,padding:"3px 12px",display:"flex",alignItems:"center",gap:6}}>
+            <div className="pulse" style={{width:6,height:6,borderRadius:"50%",background:"var(--green)"}}/>
+            <span style={{fontSize:12,color:"var(--text2)"}}>{roomCode}</span>
+          </div>
+          {loading&&<span className="pulse" style={{fontSize:11,color:"var(--text3)"}}>Sincronizando...</span>}
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:6}}>
+          <div style={{display:"flex",gap:4,background:"var(--bg3)",border:"1px solid var(--border)",borderRadius:10,padding:4}}>
+            {[["consulta","Consulta"],["registro","Registros"],["chat","Chat"]].map(([key,label])=>(
+              <button key={key} onClick={()=>setTab(key)} className={`tab-btn ${tab===key?"active":""}`}>{label}</button>
             ))}
           </div>
+          <button onClick={()=>{setRoomCode(null);setRecords([]);resetSearch();}} className="btn-ghost" style={{borderRadius:8,fontSize:12,padding:"6px 12px"}}>Salir</button>
         </div>
       </div>
 
-      <div style={{background:"#0d1520",borderBottom:"1px solid #1e2d3d",padding:"10px 24px",display:"flex",gap:32,alignItems:"center",flexWrap:"wrap"}}>
-        {[["TOTAL TAGs",records.length,"#7dd3fc"],["COMPLETADOS",completados,"#00ff9d"],["PENDIENTES",pendientes,"#fbbf24"]].map(([label,val,color])=>(
+      {/* Stats bar */}
+      <div style={{background:"var(--bg2)",borderBottom:"1px solid var(--border)",padding:"10px 24px",display:"flex",gap:24,alignItems:"center",flexWrap:"wrap"}}>
+        {[[records.length,"Total","var(--blue)"],[completados,"Completados","var(--green)"],[pendientes,"Pendientes","var(--amber)"]].map(([val,label,color])=>(
           <div key={label} style={{display:"flex",alignItems:"center",gap:8}}>
             <span style={{fontSize:20,fontWeight:700,color}}>{val}</span>
-            <span style={{fontSize:11,color:"#4a5568",letterSpacing:1}}>{label}</span>
+            <span style={{fontSize:12,color:"var(--text3)"}}>{label}</span>
           </div>
         ))}
-        <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8}}>
-          <div style={{width:100,height:4,background:"#1e2d3d",borderRadius:2,overflow:"hidden"}}>
-            <div style={{width:`${records.length?(completados/records.length)*100:0}%`,height:"100%",background:"#00ff9d",borderRadius:2,transition:"width 0.5s"}}/>
+        <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:10}}>
+          <div className="progress-bar" style={{width:120}}>
+            <div className="progress-fill" style={{width:`${pct}%`}}/>
           </div>
-          <span style={{fontSize:11,color:"#4a7a6a"}}>{records.length?Math.round((completados/records.length)*100):0}% COMPLETADO</span>
+          <span style={{fontSize:12,color:"var(--text3)",whiteSpace:"nowrap"}}>{pct}% completo</span>
         </div>
       </div>
 
-      <div style={{maxWidth:1000,margin:"0 auto",padding:"28px 24px",flex:1,width:"100%"}}>
+      <div style={{maxWidth:960,margin:"0 auto",padding:"28px 24px",flex:1,width:"100%"}}>
 
-        {tab==="consulta" && <div className="fade-in">
-          <div style={{marginBottom:28,maxWidth:540}}>
-            <h2 style={{fontSize:24,fontWeight:700,color:"#e2e8f0",marginBottom:6,letterSpacing:2}}>CONSULTA DE TAG</h2>
-            <p style={{fontSize:12,color:"#4a6a5a"}}>// ingresa el identificador único para verificar su estado</p>
+        {/* TAB: CONSULTA */}
+        {tab==="consulta"&&<div className="fade">
+          <div style={{marginBottom:24,maxWidth:520}}>
+            <h2 style={{fontSize:22,fontWeight:700,color:"var(--text)",marginBottom:4}}>Consulta de TAG</h2>
+            <p style={{fontSize:13,color:"var(--text3)"}}>Ingresá el identificador para verificar su estado</p>
           </div>
-          <div style={{display:"flex",gap:10,maxWidth:540,marginBottom:28}}>
-            <input value={query} onChange={e=>{setQuery(e.target.value.toUpperCase());setStatus(STATUS.idle);}} placeholder="TAG-XXXX" style={{fontSize:16,letterSpacing:2}} onKeyDown={e=>e.key==="Enter"&&handleSearch()}/>
-            <button onClick={handleSearch} className="btn btn-primary" style={{whiteSpace:"nowrap"}}>VERIFICAR</button>
-            {status!==STATUS.idle && <button onClick={resetSearch} className="btn btn-danger">RESET</button>}
+          <div style={{display:"flex",gap:8,maxWidth:520,marginBottom:24}}>
+            <input value={query} onChange={e=>{setQuery(e.target.value.toUpperCase());setStatus(S.idle);}} placeholder="TAG-XXXX" style={{fontSize:15,letterSpacing:1.5}} onKeyDown={e=>e.key==="Enter"&&handleSearch()}/>
+            <button onClick={handleSearch} className="btn-green" style={{whiteSpace:"nowrap",borderRadius:8,padding:"10px 18px"}}>Verificar</button>
+            {status!==S.idle&&<button onClick={resetSearch} className="btn-ghost" style={{borderRadius:8,padding:"10px 14px"}}>✕</button>}
           </div>
 
-          {status===STATUS.found && currentRecord && (
-            <div className="card fade-in scan-line" style={{maxWidth:540,borderColor:currentRecord.estado_calidad&&currentRecord.estado_precomisionado?"#00ff9d44":"#fbbf2444"}}>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
-                <span style={{fontSize:20,color:"#00ff9d",letterSpacing:3}}>{currentRecord.tag}</span>
-                <div style={{display:"flex",gap:8,alignItems:"center"}}>
-                  <span className="tag-badge" style={{background:currentRecord.estado_calidad&&currentRecord.estado_precomisionado?"#00ff9d22":"#fbbf2422",color:currentRecord.estado_calidad&&currentRecord.estado_precomisionado?"#00ff9d":"#fbbf24",border:`1px solid ${currentRecord.estado_calidad&&currentRecord.estado_precomisionado?"#00ff9d":"#fbbf24"}`}}>
-                    {currentRecord.estado_calidad&&currentRecord.estado_precomisionado?"✓ HECHO":"⏳ PENDIENTE"}
-                  </span>
-                  <button onClick={()=>setConfirmDelete(currentRecord.tag)} style={{background:"none",border:"1px solid #ff444433",color:"#ff4444",borderRadius:4,cursor:"pointer",fontSize:11,padding:"3px 8px",fontFamily:"'Courier New',monospace"}}>✕</button>
-                </div>
-              </div>
-              <div style={{display:"grid",gap:12}}>
-                {[["Planilla Calidad",currentRecord.estado_calidad,"estado_calidad"],["Planilla Precomisionado",currentRecord.estado_precomisionado,"estado_precomisionado"]].map(([label,val,field])=>(
-                  <div key={label} style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                    <span style={{fontSize:12,color:"#7dd3fc"}}>{label}</span>
-                    <div style={{display:"flex",alignItems:"center",gap:8}}>
-                      <span className="check-box" style={{background:val?"#00ff9d22":"#ff444422",color:val?"#00ff9d":"#ff4444",border:`1px solid ${val?"#00ff9d":"#ff4444"}`}}>{val?"✓":"✗"}</span>
-                      {val && <button onClick={()=>updateRecord(currentRecord.tag,{[field]:false})} style={{background:"none",border:"1px solid #ff444444",color:"#ff4444",borderRadius:4,cursor:"pointer",fontSize:11,padding:"2px 8px",fontFamily:"'Courier New',monospace"}} onMouseOver={e=>e.currentTarget.style.background="#ff444422"} onMouseOut={e=>e.currentTarget.style.background="none"}>✕ quitar</button>}
-                    </div>
-                  </div>
-                ))}
-                {[["Fecha de Firma",currentRecord.fecha],["Responsable",currentRecord.responsable],["Notas",currentRecord.notas]].map(([label,val])=>val&&(
-                  <div key={label} style={{display:"flex",justifyContent:"space-between",gap:16}}>
-                    <span style={{fontSize:12,color:"#7dd3fc"}}>{label}</span>
-                    <span style={{fontSize:12,color:"#a0aec0",textAlign:"right"}}>{val}</span>
-                  </div>
-                ))}
-                {currentRecord.link && <a href={currentRecord.link} target="_blank" rel="noreferrer" style={{fontSize:11,color:"#00ff9d",textDecoration:"none"}}>→ VER DOCUMENTO</a>}
-                {(!currentRecord.estado_calidad||!currentRecord.estado_precomisionado)&&!precomMode&&(
-                  <div style={{marginTop:8,borderTop:"1px solid #1e3a2a",paddingTop:16}}>
-                    <p style={{fontSize:11,color:"#fbbf24",marginBottom:10,letterSpacing:1}}>⚠ PLANILLAS PENDIENTES</p>
-                    <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                      {!currentRecord.estado_calidad&&<button onClick={()=>{setPrecomForm({fecha:new Date().toISOString().split("T")[0],responsable:currentRecord.responsable||"",notas:""});setPrecomMode("calidad");}} className="btn btn-primary" style={{width:"100%",background:"#fbbf24",color:"#0a0e14"}}>+ COMPLETAR PLANILLA DE CALIDAD</button>}
-                      {!currentRecord.estado_precomisionado&&<button onClick={()=>{setPrecomForm({fecha:new Date().toISOString().split("T")[0],responsable:currentRecord.responsable||"",notas:""});setPrecomMode("precom");}} className="btn btn-primary" style={{width:"100%",background:"#7dd3fc",color:"#0a0e14"}}>+ COMPLETAR PLANILLA DE PRECOMISIONADO</button>}
-                    </div>
-                  </div>
-                )}
-                {precomMode&&(
-                  <div className="fade-in" style={{marginTop:8,borderTop:"1px solid #1e3a2a",paddingTop:16,display:"grid",gap:12}}>
-                    <p style={{fontSize:11,color:precomMode==="calidad"?"#fbbf24":"#7dd3fc",letterSpacing:1}}>DATOS DE {precomMode==="calidad"?"CALIDAD":"PRECOMISIONADO"}</p>
-                    <div><label style={{fontSize:11,color:"#4a7a6a",display:"block",marginBottom:5}}>FECHA *</label><input type="date" value={precomForm.fecha} onChange={e=>setPrecomForm({...precomForm,fecha:e.target.value})}/></div>
-                    <div><label style={{fontSize:11,color:"#4a7a6a",display:"block",marginBottom:5}}>RESPONSABLE *</label><input value={precomForm.responsable} onChange={e=>setPrecomForm({...precomForm,responsable:e.target.value})} placeholder="Ing. Apellido"/></div>
-                    <div><label style={{fontSize:11,color:"#4a7a6a",display:"block",marginBottom:5}}>NOTAS</label><textarea value={precomForm.notas} onChange={e=>setPrecomForm({...precomForm,notas:e.target.value})} placeholder="Observaciones..." style={{resize:"vertical",minHeight:50}}/></div>
-                    <div style={{display:"flex",gap:10}}>
-                      <button onClick={handlePrecomSubmit} className="btn btn-primary" style={{flex:1}} disabled={!precomForm.responsable.trim()}>GUARDAR</button>
-                      <button onClick={()=>setPrecomMode(false)} className="btn btn-secondary">CANCELAR</button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {status===STATUS.notfound&&(
-            <div className="card fade-in" style={{maxWidth:540,borderColor:"#ff444433"}}>
-              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
-                <span style={{fontSize:24}}>⚠</span>
+          {status===S.found&&currentRecord&&(
+            <div className="card-lg fade" style={{maxWidth:520,borderColor:currentRecord.estado_calidad&&currentRecord.estado_precomisionado?"#22d17a30":"#fbbf2430"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18}}>
                 <div>
-                  <p style={{fontSize:15,fontWeight:700,color:"#ff4444"}}>TAG NO ENCONTRADO</p>
-                  <p style={{fontSize:12,color:"#4a5568"}}>"{query}" no existe en la base de datos</p>
+                  <p style={{fontSize:18,fontWeight:700,color:"var(--text)",letterSpacing:1.5}}>{currentRecord.tag}</p>
+                  <div style={{marginTop:6}}>
+                    <span className={`badge ${currentRecord.estado_calidad&&currentRecord.estado_precomisionado?"badge-green":"badge-amber"}`}>
+                      {currentRecord.estado_calidad&&currentRecord.estado_precomisionado?"✓ Completado":"⏳ Pendiente"}
+                    </span>
+                  </div>
                 </div>
+                <button onClick={()=>setConfirmDelete(currentRecord.tag)} style={{background:"var(--red-dim)",border:"1px solid #f8717130",color:"var(--red)",borderRadius:8,padding:"6px 10px",fontSize:13}}>✕</button>
               </div>
-              <p style={{fontSize:14,color:"#a0aec0",marginBottom:16}}>¿Deseas agregar este registro?</p>
-              <div style={{display:"flex",gap:12}}>
-                <button onClick={startAdd} className="btn btn-primary">SÍ, AGREGAR</button>
-                <button onClick={resetSearch} className="btn btn-secondary">NO, CANCELAR</button>
+              <hr className="divider"/>
+              <div style={{display:"grid",gap:10,marginBottom:16}}>
+                {[["Planilla Calidad",currentRecord.estado_calidad,"estado_calidad"],["Planilla Precomisionado",currentRecord.estado_precomisionado,"estado_precomisionado"]].map(([label,val,field])=>(
+                  <div key={field} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0"}}>
+                    <span style={{fontSize:13,color:"var(--text2)"}}>{label}</span>
+                    <div style={{display:"flex",alignItems:"center",gap:8}}>
+                      <span className={`check ${val?"check-on":"check-off"}`}>{val?"✓":"✗"}</span>
+                      {val&&<button onClick={()=>updateRecord(currentRecord.tag,{[field]:false})} style={{background:"none",border:"1px solid #f8717130",color:"var(--red)",borderRadius:6,fontSize:11,padding:"2px 8px"}}>quitar</button>}
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          )}
-
-          {status===STATUS.adding&&(
-            <div className="card fade-in" style={{maxWidth:540,borderColor:"#7dd3fc33"}}>
-              <h3 style={{fontSize:16,fontWeight:700,color:"#7dd3fc",marginBottom:20,letterSpacing:2}}>NUEVO REGISTRO: {query}</h3>
-              <div style={{display:"grid",gap:16}}>
-                <div><label style={{fontSize:11,color:"#4a7a6a",display:"block",marginBottom:6}}>FECHA *</label><input type="date" value={form.fecha} onChange={e=>setForm({...form,fecha:e.target.value})}/></div>
-                <div><label style={{fontSize:11,color:"#4a7a6a",display:"block",marginBottom:6}}>RESPONSABLE *</label><input value={form.responsable} onChange={e=>setForm({...form,responsable:e.target.value})} placeholder="Ing. Apellido"/></div>
-                <div><label style={{fontSize:11,color:"#4a7a6a",display:"block",marginBottom:6}}>LINK</label><input value={form.link} onChange={e=>setForm({...form,link:e.target.value})} placeholder="https://..."/></div>
-                <div><label style={{fontSize:11,color:"#4a7a6a",display:"block",marginBottom:6}}>NOTAS</label><textarea value={form.notas} onChange={e=>setForm({...form,notas:e.target.value})} placeholder="Observaciones..." style={{resize:"vertical",minHeight:60}}/></div>
-                <div style={{borderTop:"1px solid #1e2d3d",paddingTop:16}}>
-                  <p style={{fontSize:11,color:"#4a7a6a",marginBottom:12}}>ESTADO DE PLANILLAS</p>
-                  {[["estado_calidad","Planilla de Calidad"],["estado_precomisionado","Planilla de Precomisionado"]].map(([key,label])=>(
-                    <label key={key} className="checkbox-row"><input type="checkbox" checked={form[key]} onChange={e=>setForm({...form,[key]:e.target.checked})}/><span style={{fontSize:14,color:"#a0aec0"}}>{label}</span></label>
+              {[["Fecha",currentRecord.fecha],["Responsable",currentRecord.responsable],["Notas",currentRecord.notas]].some(([,v])=>v)&&(
+                <div style={{background:"var(--bg3)",borderRadius:10,padding:"12px 14px",marginBottom:14}}>
+                  {[["Fecha",currentRecord.fecha],["Responsable",currentRecord.responsable],["Notas",currentRecord.notas]].map(([label,val])=>val&&(
+                    <div key={label} style={{display:"flex",justifyContent:"space-between",gap:16,padding:"4px 0"}}>
+                      <span style={{fontSize:12,color:"var(--text3)"}}>{label}</span>
+                      <span style={{fontSize:12,color:"var(--text2)",textAlign:"right"}}>{val}</span>
+                    </div>
                   ))}
                 </div>
-                {formError&&<p style={{fontSize:12,color:"#ff4444",padding:"8px 12px",background:"#ff444411",borderRadius:4}}>{formError}</p>}
-                <div style={{display:"flex",gap:12}}>
-                  <button onClick={handleFormSubmit} className="btn btn-primary" style={{flex:1}}>GUARDAR REGISTRO</button>
-                  <button onClick={()=>setStatus(STATUS.notfound)} className="btn btn-secondary">CANCELAR</button>
+              )}
+              {currentRecord.link&&<a href={currentRecord.link} target="_blank" rel="noreferrer" style={{fontSize:12,color:"var(--green)",textDecoration:"none",display:"block",marginBottom:14}}>→ Ver documento</a>}
+              {(!currentRecord.estado_calidad||!currentRecord.estado_precomisionado)&&!precomMode&&(
+                <div style={{marginTop:4}}>
+                  <p style={{fontSize:11,color:"var(--amber)",marginBottom:10,fontWeight:600}}>⚠ Planillas pendientes</p>
+                  <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                    {!currentRecord.estado_calidad&&<button onClick={()=>{setPrecomForm({fecha:new Date().toISOString().split("T")[0],responsable:currentRecord.responsable||"",notas:""});setPrecomMode("calidad");}} style={{background:"#fbbf2418",color:"var(--amber)",border:"1px solid #fbbf2430",borderRadius:8,padding:"10px",fontSize:13,fontWeight:600}}>+ Completar Planilla de Calidad</button>}
+                    {!currentRecord.estado_precomisionado&&<button onClick={()=>{setPrecomForm({fecha:new Date().toISOString().split("T")[0],responsable:currentRecord.responsable||"",notas:""});setPrecomMode("precom");}} style={{background:"var(--blue-dim)",color:"var(--blue)",border:"1px solid #60a5fa30",borderRadius:8,padding:"10px",fontSize:13,fontWeight:600}}>+ Completar Planilla de Precomisionado</button>}
+                  </div>
+                </div>
+              )}
+              {precomMode&&(
+                <div className="fade" style={{marginTop:12,background:"var(--bg3)",borderRadius:10,padding:16,display:"grid",gap:12}}>
+                  <p style={{fontSize:12,fontWeight:700,color:precomMode==="calidad"?"var(--amber)":"var(--blue)",textTransform:"uppercase",letterSpacing:.5}}>Datos de {precomMode==="calidad"?"Calidad":"Precomisionado"}</p>
+                  <div><label style={{fontSize:11,color:"var(--text3)",display:"block",marginBottom:5}}>Fecha *</label><input type="date" value={precomForm.fecha} onChange={e=>setPrecomForm({...precomForm,fecha:e.target.value})}/></div>
+                  <div><label style={{fontSize:11,color:"var(--text3)",display:"block",marginBottom:5}}>Responsable *</label><input value={precomForm.responsable} onChange={e=>setPrecomForm({...precomForm,responsable:e.target.value})} placeholder="Ing. Apellido"/></div>
+                  <div><label style={{fontSize:11,color:"var(--text3)",display:"block",marginBottom:5}}>Notas</label><textarea value={precomForm.notas} onChange={e=>setPrecomForm({...precomForm,notas:e.target.value})} placeholder="Observaciones..." style={{resize:"vertical",minHeight:60}}/></div>
+                  <div style={{display:"flex",gap:8}}>
+                    <button onClick={handlePrecomSubmit} className="btn-green" style={{flex:1,borderRadius:8}} disabled={!precomForm.responsable.trim()}>Guardar</button>
+                    <button onClick={()=>setPrecomMode(false)} className="btn-ghost" style={{borderRadius:8}}>Cancelar</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {status===S.notfound&&(
+            <div className="card-lg fade" style={{maxWidth:520,borderColor:"#f8717130"}}>
+              <div style={{display:"flex",gap:14,alignItems:"flex-start",marginBottom:16}}>
+                <div style={{width:40,height:40,borderRadius:10,background:"var(--red-dim)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>⚠</div>
+                <div>
+                  <p style={{fontSize:15,fontWeight:700,color:"var(--red)",marginBottom:4}}>TAG no encontrado</p>
+                  <p style={{fontSize:13,color:"var(--text3)"}}>"{query}" no existe en la base de datos</p>
+                </div>
+              </div>
+              <p style={{fontSize:13,color:"var(--text2)",marginBottom:16}}>¿Querés agregar este registro?</p>
+              <div style={{display:"flex",gap:8}}>
+                <button onClick={startAdd} className="btn-green" style={{flex:1,borderRadius:8}}>Sí, agregar</button>
+                <button onClick={resetSearch} className="btn-ghost" style={{flex:1,borderRadius:8}}>Cancelar</button>
+              </div>
+            </div>
+          )}
+
+          {status===S.adding&&(
+            <div className="card-lg fade" style={{maxWidth:520,borderColor:"#60a5fa30"}}>
+              <p style={{fontSize:15,fontWeight:700,color:"var(--blue)",marginBottom:20}}>Nuevo registro: <span style={{letterSpacing:1.5}}>{query}</span></p>
+              <div style={{display:"grid",gap:14}}>
+                <div><label style={{fontSize:11,color:"var(--text3)",display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:.5}}>Fecha *</label><input type="date" value={form.fecha} onChange={e=>setForm({...form,fecha:e.target.value})}/></div>
+                <div><label style={{fontSize:11,color:"var(--text3)",display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:.5}}>Responsable *</label><input value={form.responsable} onChange={e=>setForm({...form,responsable:e.target.value})} placeholder="Ing. Apellido"/></div>
+                <div><label style={{fontSize:11,color:"var(--text3)",display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:.5}}>Link</label><input value={form.link} onChange={e=>setForm({...form,link:e.target.value})} placeholder="https://..."/></div>
+                <div><label style={{fontSize:11,color:"var(--text3)",display:"block",marginBottom:5,textTransform:"uppercase",letterSpacing:.5}}>Notas</label><textarea value={form.notas} onChange={e=>setForm({...form,notas:e.target.value})} placeholder="Observaciones..." style={{resize:"vertical",minHeight:70}}/></div>
+                <div style={{background:"var(--bg3)",borderRadius:10,padding:"12px 16px"}}>
+                  <p style={{fontSize:11,color:"var(--text3)",marginBottom:8,textTransform:"uppercase",letterSpacing:.5}}>Estado de planillas</p>
+                  {[["estado_calidad","Planilla de Calidad"],["estado_precomisionado","Planilla de Precomisionado"]].map(([key,label])=>(
+                    <label key={key} className="checkbox-row"><input type="checkbox" checked={form[key]} onChange={e=>setForm({...form,[key]:e.target.checked})}/><span style={{fontSize:14,color:"var(--text2)"}}>{label}</span></label>
+                  ))}
+                </div>
+                {formError&&<p style={{fontSize:12,color:"var(--red)",padding:"10px 12px",background:"var(--red-dim)",borderRadius:8}}>{formError}</p>}
+                <div style={{display:"flex",gap:8}}>
+                  <button onClick={handleFormSubmit} className="btn-green" style={{flex:1,borderRadius:8}}>Guardar registro</button>
+                  <button onClick={()=>setStatus(S.notfound)} className="btn-ghost" style={{borderRadius:8}}>Cancelar</button>
                 </div>
               </div>
             </div>
           )}
 
-          {status===STATUS.success&&currentRecord&&(
-            <div className="card fade-in scan-line" style={{maxWidth:540,borderColor:"#00ff9d44"}}>
-              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
-                <span style={{fontSize:28,color:"#00ff9d"}}>✓</span>
+          {status===S.success&&currentRecord&&(
+            <div className="card-lg fade" style={{maxWidth:520,borderColor:"#22d17a30"}}>
+              <div style={{display:"flex",gap:14,alignItems:"center",marginBottom:16}}>
+                <div style={{width:40,height:40,borderRadius:10,background:"var(--green-dim2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>✓</div>
                 <div>
-                  <p style={{fontSize:16,fontWeight:700,color:"#00ff9d"}}>REGISTRO GUARDADO</p>
-                  <p style={{fontSize:12,color:"#4a6a5a"}}>{currentRecord.tag} agregado correctamente</p>
+                  <p style={{fontSize:15,fontWeight:700,color:"var(--green)"}}>Registro guardado</p>
+                  <p style={{fontSize:12,color:"var(--text3)"}}>{currentRecord.tag} agregado correctamente</p>
                 </div>
               </div>
-              <button onClick={resetSearch} className="btn btn-primary">NUEVA CONSULTA</button>
+              <button onClick={resetSearch} className="btn-green" style={{borderRadius:8,width:"100%"}}>Nueva consulta</button>
             </div>
           )}
         </div>}
 
-        {tab==="registro"&&<div className="fade-in">
+        {/* TAB: REGISTROS */}
+        {tab==="registro"&&<div className="fade">
           <div style={{marginBottom:20}}>
-            <h2 style={{fontSize:24,fontWeight:700,color:"#e2e8f0",letterSpacing:2}}>BASE DE DATOS</h2>
-            <p style={{fontSize:12,color:"#4a6a5a",marginBottom:14}}>// {records.length} registros — sala: {roomCode}</p>
-            <button
-              onClick={()=>exportToExcel(records, roomCode)}
-              className="btn btn-excel"
-              disabled={records.length===0}
-              style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:8,fontSize:14,padding:"12px"}}
-            >
-              <span style={{fontSize:18}}>📥</span> DESCARGAR EXCEL
-            </button>
+            <h2 style={{fontSize:22,fontWeight:700,color:"var(--text)",marginBottom:4}}>Base de datos</h2>
+            <p style={{fontSize:13,color:"var(--text3)",marginBottom:16}}>{records.length} registros — sala: {roomCode}</p>
+            <div style={{display:"flex",gap:10,marginBottom:16}}>
+              <input type="file" accept=".xlsx,.xls" ref={excelImportRef} onChange={e=>handleExcelSelect(e,true)} style={{display:"none"}}/>
+              <button onClick={()=>excelImportRef.current.click()} className="btn-ghost" style={{borderRadius:8,display:"flex",alignItems:"center",gap:6}}>
+                <span>📊</span> Importar Excel
+              </button>
+              <button onClick={()=>exportToExcel(records,roomCode)} className="btn-excel" disabled={records.length===0} style={{borderRadius:8,display:"flex",alignItems:"center",gap:6,marginLeft:"auto"}}>
+                <span>📥</span> Descargar Excel
+              </button>
+            </div>
           </div>
           <div className="card" style={{padding:0,overflow:"hidden"}}>
             <div style={{overflowX:"auto"}}>
               <table>
                 <thead><tr>{["TAG","Calidad","Precomisionado","Estado","Fecha","Responsable","Doc",""].map(h=><th key={h}>{h}</th>)}</tr></thead>
                 <tbody>
+                  {records.length===0&&<tr><td colSpan={8} style={{textAlign:"center",color:"var(--text3)",padding:32}}>Sin registros aún</td></tr>}
                   {records.map((r,i)=>(
                     <tr key={i}>
-                      <td><span style={{color:"#7dd3fc",letterSpacing:1}}>{r.tag}</span></td>
-                      <td><span className="check-box" style={{background:r.estado_calidad?"#00ff9d22":"#ff444422",color:r.estado_calidad?"#00ff9d":"#ff4444",border:`1px solid ${r.estado_calidad?"#00ff9d":"#ff4444"}`}}>{r.estado_calidad?"✓":"✗"}</span></td>
-                      <td><span className="check-box" style={{background:r.estado_precomisionado?"#00ff9d22":"#ff444422",color:r.estado_precomisionado?"#00ff9d":"#ff4444",border:`1px solid ${r.estado_precomisionado?"#00ff9d":"#ff4444"}`}}>{r.estado_precomisionado?"✓":"✗"}</span></td>
-                      <td><span className="tag-badge" style={{background:r.estado_calidad&&r.estado_precomisionado?"#00ff9d22":"#fbbf2422",color:r.estado_calidad&&r.estado_precomisionado?"#00ff9d":"#fbbf24",fontSize:11}}>{r.estado_calidad&&r.estado_precomisionado?"HECHO":"PENDIENTE"}</span></td>
-                      <td style={{fontSize:12,color:"#718096"}}>{r.fecha||"—"}</td>
-                      <td style={{fontSize:12,color:"#a0aec0"}}>{r.responsable||"—"}</td>
-                      <td>{r.link?<a href={r.link} target="_blank" rel="noreferrer" style={{color:"#00ff9d",fontSize:11}}>→ VER</a>:<span style={{color:"#2d3748"}}>—</span>}</td>
-                      <td><button onClick={()=>setConfirmDelete(r.tag)} style={{background:"none",border:"1px solid #ff444433",color:"#ff4444",borderRadius:4,cursor:"pointer",fontSize:11,padding:"3px 10px",fontFamily:"'Courier New',monospace"}} onMouseOver={e=>e.currentTarget.style.background="#ff444422"} onMouseOut={e=>e.currentTarget.style.background="none"}>✕</button></td>
+                      <td><span style={{fontWeight:600,color:"var(--blue)",letterSpacing:.5}}>{r.tag}</span></td>
+                      <td><span className={`check ${r.estado_calidad?"check-on":"check-off"}`}>{r.estado_calidad?"✓":"✗"}</span></td>
+                      <td><span className={`check ${r.estado_precomisionado?"check-on":"check-off"}`}>{r.estado_precomisionado?"✓":"✗"}</span></td>
+                      <td><span className={`badge ${r.estado_calidad&&r.estado_precomisionado?"badge-green":"badge-amber"}`}>{r.estado_calidad&&r.estado_precomisionado?"Completado":"Pendiente"}</span></td>
+                      <td style={{color:"var(--text3)"}}>{r.fecha||"—"}</td>
+                      <td style={{color:"var(--text2)"}}>{r.responsable||"—"}</td>
+                      <td>{r.link?<a href={r.link} target="_blank" rel="noreferrer" style={{color:"var(--green)",fontSize:12,textDecoration:"none"}}>→ Ver</a>:<span style={{color:"var(--text3)"}}>—</span>}</td>
+                      <td><button onClick={()=>setConfirmDelete(r.tag)} style={{background:"var(--red-dim)",border:"1px solid #f8717128",color:"var(--red)",borderRadius:6,fontSize:12,padding:"4px 10px"}}>✕</button></td>
                     </tr>
                   ))}
                 </tbody>
@@ -565,34 +594,39 @@ function App() {
           </div>
         </div>}
 
-        {tab==="chat"&&<div className="fade-in" style={{display:"flex",flexDirection:"column",height:"calc(100vh - 220px)"}}>
+        {/* TAB: CHAT */}
+        {tab==="chat"&&<div className="fade" style={{display:"flex",flexDirection:"column",height:"calc(100vh - 240px)"}}>
           <div style={{marginBottom:16}}>
-            <h2 style={{fontSize:24,fontWeight:700,color:"#e2e8f0",letterSpacing:2}}>ASISTENTE</h2>
-            <p style={{fontSize:12,color:"#4a6a5a"}}>// consultá un TAG · importá desde Excel 📊</p>
+            <h2 style={{fontSize:22,fontWeight:700,color:"var(--text)",marginBottom:4}}>Asistente</h2>
+            <p style={{fontSize:13,color:"var(--text3)"}}>Consultá un TAG o importá desde Excel</p>
           </div>
-          <div className="card" style={{flex:1,display:"flex",flexDirection:"column",minHeight:0}}>
-            <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:14,padding:"8px 0",marginBottom:14}}>
+          <div className="card" style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,padding:16}}>
+            <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:12,marginBottom:12}}>
               {chatMessages.map((m,i)=>(
-                <div key={i} style={{display:"flex",flexDirection:"column",alignItems:m.role==="user"?"flex-end":"flex-start"}}>
-                  <div className="chat-bubble" style={{background:m.role==="user"?"#00ff9d22":"#1a2535",border:`1px solid ${m.role==="user"?"#00ff9d44":"#1e2d3d"}`,color:m.role==="user"?"#00ff9d":"#a0aec0"}}>{m.text}</div>
+                <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start"}}>
+                  <div className="chat-msg" style={{
+                    background:m.role==="user"?"var(--green-dim2)":"var(--bg3)",
+                    border:`1px solid ${m.role==="user"?"#22d17a30":"var(--border)"}`,
+                    color:m.role==="user"?"var(--green)":"var(--text2)"
+                  }}>{m.text}</div>
                 </div>
               ))}
-              {chatLoading&&<div style={{display:"flex"}}><div className="chat-bubble" style={{background:"#1a2535",border:"1px solid #1e2d3d",color:"#00ff9d"}}><span className="pulse" style={{fontSize:12}}>procesando...</span></div></div>}
               {wizardTags&&<ImportWizard tags={wizardTags} db={records} onFinish={handleWizardFinish} onCancel={()=>{setWizardTags(null);setChatMessages(prev=>[...prev,{role:"assistant",text:"Importación cancelada."}]);}}/>}
               <div ref={chatEndRef}/>
             </div>
-            <div style={{display:"flex",gap:10}}>
+            <div style={{display:"flex",gap:8,borderTop:"1px solid var(--border)",paddingTop:12}}>
               <input type="file" accept=".xlsx,.xls" ref={excelRef} onChange={handleExcelSelect} style={{display:"none"}}/>
-              <button onClick={()=>excelRef.current.click()} className="img-btn" title="Cargar Excel">📊</button>
-              <input value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder="Escribí un TAG para consultarlo..." disabled={chatLoading} onKeyDown={e=>e.key==="Enter"&&handleChatSend()}/>
-              <button onClick={handleChatSend} className="btn btn-primary" disabled={chatLoading||!chatInput.trim()} style={{whiteSpace:"nowrap"}}>ENVIAR</button>
+              <button onClick={()=>excelRef.current.click()} className="icon-btn" title="Cargar Excel">📊</button>
+              <input value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder="Escribí un TAG para consultarlo..." onKeyDown={e=>e.key==="Enter"&&handleChatSend()} style={{flex:1}}/>
+              <button onClick={handleChatSend} className="btn-green" disabled={!chatInput.trim()} style={{borderRadius:8,padding:"10px 16px"}}>Enviar</button>
             </div>
           </div>
         </div>}
+
       </div>
 
-      <div style={{borderTop:"1px solid #1e3a2a",padding:"16px 24px",textAlign:"center",background:"#0d1318"}}>
-        <span style={{fontSize:12,color:"#4a6a5a",letterSpacing:2}}>DESARROLLADO POR <span style={{color:"#00ff9d"}}>FRANCISCO ROLDÁN</span></span>
+      <div style={{borderTop:"1px solid var(--border)",padding:"14px 24px",textAlign:"center",background:"var(--bg2)"}}>
+        <span style={{fontSize:12,color:"var(--text3)"}}>Desarrollado por <span style={{color:"var(--green)",fontWeight:600}}>Francisco Roldán</span></span>
       </div>
     </div>
   );
