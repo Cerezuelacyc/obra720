@@ -654,7 +654,9 @@ function App() {
               <button onClick={()=>{setImageData(null);setImagePreview(null);}} style={{background:"none",border:"none",color:"#ff4444",cursor:"pointer",fontSize:16}}>✕</button>
             </div>}
             <div style={{display:"flex",gap:10}}>
+              <input type="file" accept="image/*" ref={fileRef} onChange={handleImageSelect} style={{display:"none"}}/>
               <input type="file" accept=".xlsx,.xls" ref={excelRef} onChange={handleExcelSelect} style={{display:"none"}}/>
+              <button onClick={()=>fileRef.current.click()} className="img-btn" title="Adjuntar imagen">📷</button>
               <button onClick={()=>excelRef.current.click()} className="img-btn" title="Cargar Excel" style={{fontSize:16}}>📊</button>
               <input value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder={imageData?"Instrucciones opcionales...":"¿Cómo está el TAG-A123?..."} disabled={chatLoading} onKeyDown={e=>e.key==="Enter"&&handleChatSend()}/>
               <button onClick={handleChatSend} className="btn btn-primary" disabled={chatLoading||(!chatInput.trim()&&!imageData)} style={{whiteSpace:"nowrap"}}>ENVIAR</button>
